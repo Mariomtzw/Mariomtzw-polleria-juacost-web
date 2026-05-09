@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-red: #b92b27;
+  --color-brand-red-dark: #9a201d; /* Rojo más oscuro para sombras, sin usar negro */
+  --color-brand-yellow: #fbbc1b;
+  --color-brand-yellow-light: #fcd052;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-brand-red);
+  color: white;
+  overflow-x: hidden;
+}
+
+/* Ocultar barra de desplazamiento para un look más limpio */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-brand-red-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-yellow);
+  border-radius: 10px;
+}
