@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useState } from 'react'; // <-- Agregamos useState
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion'; //<- Se cambia para que acepte variables por errores en vercel 
 import { Leaf, Truck, Star, Phone, MapPin, Clock, ArrowRight } from 'lucide-react';
 import { LampContainer } from '../components/ui/lamp';
 import { AuroraButton } from '../components/ui/aurora-button';
 import Image from 'next/image';
 
 // Variantes de animación
-const fadeInUp = {
+const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeInOut" } }
 };
 
 const staggerContainer = {
