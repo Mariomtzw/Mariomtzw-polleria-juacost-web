@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, Variants } from 'framer-motion';
-import { Leaf, Truck, Star, Phone, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { Leaf, Truck, Star, Phone, MapPin, Clock, ArrowRight, EggFried, LeafIcon } from 'lucide-react';
 import { LampContainer } from '../components/ui/lamp';
 import { AuroraButton } from '../components/ui/aurora-button';
 import Image from 'next/image';
@@ -160,8 +160,8 @@ export default function Home() {
               <p className="text-base md:text-lg font-bold mb-6 md:mb-8 relative z-10">Gallinas de libre pastoreo, alimentación natural. Un color y sabor que resalta en cualquier platillo.</p>
               <ul className="space-y-3 md:space-y-4 font-bold relative z-10 text-sm md:text-base">
                 <li className="flex items-center gap-3"><Star className="w-5 h-5 md:w-6 md:h-6" /> 100% Orgánico </li>
-                <li className="flex items-center gap-3"><Truck className="w-5 h-5 md:w-6 md:h-6" /> Venta por Cono o Caja</li>
-                <li className="flex items-center gap-3"><Leaf className="w-5 h-5 md:w-6 md:h-6" /> Yema rica en nutrientes</li>
+                <li className="flex items-center gap-3"><Leaf className="w-5 h-5 md:w-6 md:h-6" /> Libre de pesticidas</li>
+                <li className="flex items-center gap-3"><EggFried className="w-5 h-5 md:w-6 md:h-6" /> Yema rica en nutrientes</li>
               </ul>
             </motion.div>
           </motion.div>
@@ -195,7 +195,7 @@ export default function Home() {
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
             className="bg-brand-yellow text-brand-red p-6 md:p-12 rounded-[2rem] font-bold text-base md:text-2xl leading-relaxed shadow-[6px_6px_0_0_rgba(255,255,255,1)] md:shadow-[10px_10px_0_0_rgba(255,255,255,1)]"
           >
-            Desde nuestros inicios, en Pollería Juacos't hemos mantenido una promesa inquebrantable: llevar el mejor sabor y la nutrición más pura a las familias. Creemos en el trabajo honesto, en el bienestar animal y en que la calidad de los ingredientes define el amor en cada comida. Somos tradición, somos frescura.
+            Desde nuestros inicios, en Pollos Juacos't hemos mantenido una promesa inquebrantable: llevar el mejor sabor y la nutrición más pura a las familias. Creemos en el trabajo honesto, en el bienestar animal y en que la calidad de los ingredientes define el amor en cada comida. Somos tradición, somos frescura.
           </motion.div>
         </div>
       </section>
@@ -275,7 +275,7 @@ export default function Home() {
           </motion.div>
 
           <div className="border-t-[3px] border-brand-red/20 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center font-bold text-xs md:text-sm text-center md:text-left gap-4 md:gap-0">
-            <p>© 2026 Pollería Juacos't. Todos los derechos reservados.</p>
+            <p>© 2026 Pollos Juacos't. Todos los derechos reservados.</p>
             <div className="flex gap-4">
               <a href="#" className="hover:underline">Privacidad</a>
               <a href="#" className="hover:underline">Términos</a>
