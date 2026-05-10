@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, Variants } from 'framer-motion';
-import { Leaf, Truck, Star, Phone, MapPin, Clock, ArrowRight, EggFried, LeafIcon } from 'lucide-react';
+import { Leaf, Truck, Star, Phone, MapPin, Clock, ArrowRight, EggFried, LeafIcon, Space, Slash, Tally1, Tally2, Tally4, Circle, CircleSmall } from 'lucide-react';
 import { LampContainer } from '../components/ui/lamp';
 import { AuroraButton } from '../components/ui/aurora-button';
 import Image from 'next/image';
@@ -29,7 +29,7 @@ export default function Home() {
 
   const enviarWhatsApp = (e: React.FormEvent) => {
     e.preventDefault();
-    const numero = "525551234567"; // Recuerda poner tu número real
+    const numero = "2283576092"; // Recuerda poner tu número real
     
     // Agregamos la dirección al mensaje
     const mensaje = `Buen día, quisiera cotizar por mayoreo.%0A%0A*Nombre:* ${nombre}%0A*Teléfono:* ${telefono}%0A*Dirección de entrega:* ${direccion}%0A*Pedido:* ${pedido}`;
@@ -172,7 +172,7 @@ export default function Home() {
             className="flex justify-center w-full px-4"
           >
              <AuroraButton 
-                onClick={() => window.open('https://wa.me/2283346846?text=Buen%20d%C3%ADa%2C%20quisiera%20hacer%20un%20pedido', '_blank')}
+                onClick={() => window.open('https://wa.me/2283576092?text=Buen%20d%C3%ADa%2C%20quisiera%20hacer%20un%20pedido', '_blank')}
                 className="w-full md:w-auto !px-8 md:!px-16 !py-4 md:!py-6 text-lg md:!text-2xl" 
                 glowClassName="!blur-2xl"
               >
@@ -195,8 +195,8 @@ export default function Home() {
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
             className="bg-brand-yellow text-brand-red p-6 md:p-12 rounded-[2rem] font-bold text-base md:text-2xl leading-relaxed shadow-[6px_6px_0_0_rgba(255,255,255,1)] md:shadow-[10px_10px_0_0_rgba(255,255,255,1)]"
           >
-            Desde hace más de 35 años, en Pollos Juacos't hemos mantenido una promesa inquebrantable: llevar el mejor sabor y la nutrición más pura a las familias. Creemos en el trabajo honesto, en el bienestar animal y en que la calidad de los ingredientes define el amor en cada comida.
-          <span className="bg-brand-yellow text-brand-red p-6 md:p-12 rounded-[2rem] font-bold text-base md:text-2xl leading-relaxed shadow-[6px_6px_0_0_rgba(255,255,255,1)] md:shadow-[10px_10px_0_0_rgba(255,255,255,1)]">Somos tradición, somos frescura.</span>
+            Desde hace más de 35 años, en Pollos Juacos't hemos mantenido una promesa inquebrantable: llevar el mejor sabor y la nutrición más pura a las familias. Creemos en el trabajo honesto, en el bienestar animal y en que la calidad de los ingredientes define el amor en cada comida.<br/> <br/>
+          Somos tradición, somos frescura. 
           </motion.div>
         </div>
       </section>
@@ -213,13 +213,14 @@ export default function Home() {
               <p className="text-lg md:text-xl font-bold mb-6 md:mb-8">Atendemos pedidos de mayoreo para tu negocio y menudeo para tu hogar.</p>
               <div className="space-y-4 md:space-y-6 text-base md:text-lg font-bold">
                 <div className="flex items-center gap-3 md:gap-4 bg-brand-red text-white p-4 rounded-xl">
-                  <Phone className="text-brand-yellow shrink-0" /> <span>2283 34 68 46</span>
+                  <Phone className="text-brand-yellow shrink-0" /> <span>2282 10 53 30 </span>
+                  <CircleSmall className="text-brand-yellow shrink-0" /> <span> 2283 57 60 92</span>
                 </div>
                 <div className="flex items-center gap-3 md:gap-4 bg-brand-red text-white p-4 rounded-xl">
-                  <MapPin className="text-brand-yellow shrink-0" /> <span>Banderilla, Centro, Local 73</span>
+                  <MapPin className="text-brand-yellow shrink-0" /> <span>Hidalgo #73, Banderilla Centro</span>
                 </div>
                 <div className="flex items-center gap-3 md:gap-4 bg-brand-red text-white p-4 rounded-xl">
-                  <Clock className="text-brand-yellow shrink-0" /> <span className="text-sm md:text-base">Lunes a Domingo: 6:00 AM - 4:00 PM</span>
+                  <Clock className="text-brand-yellow shrink-0" /> <span className="text-sm md:text-base">Lunes a Domingo: 7:00 AM - 3:00 PM</span>
                 </div>
               </div>
             </div>
@@ -259,7 +260,7 @@ export default function Home() {
                   required
                   value={pedido}
                   onChange={(e) => setPedido(e.target.value)}
-                  placeholder="¿Qué necesitas? (Ej. 100 de pechugas...)" 
+                  placeholder="¿Qué necesitas? (Ej. 100 pechugas en bisteces de 4 aplanados)" 
                   className="bg-brand-yellow/20 text-brand-red font-bold placeholder:text-brand-red/60 p-4 rounded-xl outline-none focus:ring-4 focus:ring-brand-red/20 transition-all resize-none text-sm md:text-base"
                 ></textarea>
                 

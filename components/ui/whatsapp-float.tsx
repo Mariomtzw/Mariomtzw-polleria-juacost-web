@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 export default function WhatsAppFloat() {
   // Reemplaza con el número real de la pollería
-  const whatsappNumber = "2283346846"; 
+  const whatsappNumber = "2283576092"; 
   const message = "¡Hola! Vengo desde el sitio web y me gustaría hacer un pedido.";
 
   return (
