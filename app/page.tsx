@@ -68,7 +68,7 @@ export default function Home() {
           {/* ENLACES - Con scroll horizontal invisible para pantallas pequeñas */}
           <div className="flex gap-4 md:gap-8 text-white font-bold text-[11px] md:text-sm tracking-wider uppercase overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden items-center ml-4 pl-2">
             <a href="#inicio" className="hover:text-brand-yellow transition-colors">Inicio</a>
-            <a href="/recetas" className="hover:text-brand-yellow transition-colors text-brand-yellow underline underline-offset-4">Recetas</a>
+            <a href="/recetas" className="hover:text-brand-yellow transition-colors">Recetas</a>
             <a href="#productos" className="hover:text-brand-yellow transition-colors">Productos</a>
             <a href="#historia" className="hover:text-brand-yellow transition-colors">Historia</a>
             <a href="#contacto" className="hover:text-brand-yellow transition-colors">Contacto</a>
@@ -106,7 +106,7 @@ export default function Home() {
             
             {/* Subtítulo más limpio y legible */}
             <p className="text-base md:text-2xl text-white/90 font-medium max-w-[90%] md:max-w-2xl mx-auto mb-8 md:mb-12 drop-shadow-md px-2 leading-relaxed">
-              De la granja a tu mesa. Especialistas en pollo de alta calidad y huevo orgánico para familias y negocios desde hace más de 30 años.
+              Especialistas en pollo de alta calidad y huevo orgánico para familias y negocios desde hace más de 35 años.
             </p>
             
             {/* Botón con micro-interacción en la flecha */}
@@ -130,7 +130,7 @@ export default function Home() {
             className="text-center mb-12 md:mb-16"
           >
             <h2 className="text-4xl md:text-7xl font-black text-brand-yellow mb-4">NUESTROS PRODUCTOS</h2>
-            <p className="text-white text-lg md:text-xl px-4">Calidad insuperable en ventas por mayoreo y menudeo.</p>
+            <p className="text-white text-lg md:text-xl px-4">Calidad insuperable de nuestra granja a tu mesa. Ventas por mayoreo y menudeo.</p>
           </motion.div>
 
           <motion.div 
@@ -157,7 +157,7 @@ export default function Home() {
                 <Star size={150} className="md:w-[200px] md:h-[200px]" />
               </div>
               <h3 className="text-3xl md:text-4xl font-black mb-4 relative z-10 text-brand-red">HUEVO ORGÁNICO</h3>
-              <p className="text-base md:text-lg font-bold mb-6 md:mb-8 relative z-10">Gallinas de libre pastoreo, alimentación natural. Un color y sabor que resalta en cualquier platillo.</p>
+              <p className="text-base md:text-lg font-bold mb-6 md:mb-8 relative z-10">Gallinas de libre pastoreo, alimentadas con una dieta natural a base de pasto fresco, albahaca, orégano y leguminosas.</p>
               <ul className="space-y-3 md:space-y-4 font-bold relative z-10 text-sm md:text-base">
                 <li className="flex items-center gap-3"><Star className="w-5 h-5 md:w-6 md:h-6" /> 100% Orgánico </li>
                 <li className="flex items-center gap-3"><Leaf className="w-5 h-5 md:w-6 md:h-6" /> Libre de pesticidas</li>
@@ -195,7 +195,8 @@ export default function Home() {
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
             className="bg-brand-yellow text-brand-red p-6 md:p-12 rounded-[2rem] font-bold text-base md:text-2xl leading-relaxed shadow-[6px_6px_0_0_rgba(255,255,255,1)] md:shadow-[10px_10px_0_0_rgba(255,255,255,1)]"
           >
-            Desde nuestros inicios, en Pollos Juacos't hemos mantenido una promesa inquebrantable: llevar el mejor sabor y la nutrición más pura a las familias. Creemos en el trabajo honesto, en el bienestar animal y en que la calidad de los ingredientes define el amor en cada comida. Somos tradición, somos frescura.
+            Desde hace más de 35 años, en Pollos Juacos't hemos mantenido una promesa inquebrantable: llevar el mejor sabor y la nutrición más pura a las familias. Creemos en el trabajo honesto, en el bienestar animal y en que la calidad de los ingredientes define el amor en cada comida.
+          <span className="bg-brand-yellow text-brand-red p-6 md:p-12 rounded-[2rem] font-bold text-base md:text-2xl leading-relaxed shadow-[6px_6px_0_0_rgba(255,255,255,1)] md:shadow-[10px_10px_0_0_rgba(255,255,255,1)]">Somos tradición, somos frescura.</span>
           </motion.div>
         </div>
       </section>
