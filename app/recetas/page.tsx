@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react'; // <-- IMPORTANTE ESTE CAMBIO
 import ScrollExpandMedia from '@/components/ui/scroll-expansion-hero';
 import { ArrowLeft, Clock, Users, ChefHat } from 'lucide-react';
 import Link from 'next/link';
@@ -130,13 +130,25 @@ const recetasData = [
 ];
 
 export default function RecetasPage() {
+  // 1. CREAMOS UN ESTADO PARA SABER QUÉ RECETA SE TOCÓ EN EL CELULAR
+  const [recetaActiva, setRecetaActiva] = useState<number | null>(null);
+
+  // 2. FUNCIÓN PARA ABRIR/CERRAR LA RECETA EN MÓVILES
+  const toggleReceta = (id: number) => {
+    if (recetaActiva === id) {
+      setRecetaActiva(null); // Si ya estaba abierta, la cierra
+    } else {
+      setRecetaActiva(id); // Si estaba cerrada, la abre
+    }
+  };
+
   return (
     <main className="bg-brand-red min-h-screen font-sans selection:bg-brand-yellow selection:text-brand-red">
       
       {/* Botón Flotante para Regresar */}
       <div className="fixed top-6 left-6 z-50">
         <Link href="/">
-          <button className="flex items-center gap-2 bg-brand-yellow text-brand-red px-4 py-2 rounded-full font-bold shadow-xl hover:scale-105 transition-transform">
+          <button className="flex items-center gap-2 bg-brand-yellow text-brand-red px-4 py-2 rounded-full font-bold shadow-xl hover:scale-105 transition-transform text-sm md:text-base">
             <ArrowLeft size={20} /> Volver a Inicio
           </button>
         </Link>
@@ -144,31 +156,31 @@ export default function RecetasPage() {
 
       <ScrollExpandMedia
         mediaType="image"
-        mediaSrc="/recetas/hero-pollo3.avif" 
+        mediaSrc="/recetas/hero-pollo.avif" 
         bgImageSrc="/recetas/hero-bg.avif"
         title="RECETAS DELICIOSAS"
-        date="Juacos't"
+        date="JUACost"
         scrollToExpand="↓ Desliza hacia abajo para cocinar ↓"
       >
         
         {/* Grid de Recetas */}
-        <div className="max-w-7xl mx-auto w-full pt-12">
+        <div className="max-w-7xl mx-auto w-full pt-12 px-4">
           <h3 className="text-4xl md:text-5xl font-black text-brand-yellow mb-12 text-center drop-shadow-md">
             INSPIRACIÓN PARA TU MESA
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
             
             {recetasData.map((receta) => (
               <div 
                 key={receta.id} 
-                className={`relative rounded-[2rem] p-6 shadow-2xl flex flex-col items-center text-center group transition-transform hover:-translate-y-2 overflow-hidden ${
+                onClick={() => toggleReceta(receta.id)} // <-- 3. AGREGAMOS EL EVENTO CLICK/TAP
+                className={`relative cursor-pointer rounded-[2rem] p-6 shadow-2xl flex flex-col items-center text-center group transition-transform md:hover:-translate-y-2 overflow-hidden ${
                   receta.color === "blanco" ? "bg-white" : "bg-brand-yellow"
                 }`}
               >
                 {/* Imagen del platillo */}
                 <div className={`w-full h-48 rounded-xl overflow-hidden mb-6 relative z-10 ${receta.color === "amarillo" ? "border-4 border-brand-red/20" : ""}`}>
-                  {/* Se usa img nativa para cargar desde local de forma simple */}
                   <img src={receta.img} alt={receta.titulo} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"/>
                 </div>
                 
@@ -184,13 +196,28 @@ export default function RecetasPage() {
                   <span className="flex items-center gap-1"><Users size={16}/> {receta.porc}</span>
                 </div>
 
-                {/* CAPA DE PREPARACIÓN QUE APARECE EN HOVER */}
-                <div className="absolute inset-0 bg-brand-red/95 p-8 flex flex-col justify-center items-center text-center opacity-0 translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-20 backdrop-blur-sm overflow-y-auto">
-                  <ChefHat size={40} className="text-brand-yellow mb-4" />
-                  <h5 className="text-2xl font-black text-brand-yellow mb-4">¿Cómo prepararlo?</h5>
-                  <p className="text-white font-bold text-sm leading-relaxed whitespace-pre-line text-left">
-                    {receta.instrucciones}
-                  </p>
+                {/* 4. CAPA DE PREPARACIÓN CON LÓGICA MIXTA (HOVER PC + TAP MÓVIL) */}
+                {/* 4. CAPA DE PREPARACIÓN CORREGIDA (SCROLL SEGURO EN MÓVILES) */}
+                <div 
+                  className={`absolute inset-0 bg-brand-red/95 p-6 transition-all duration-300 z-30 backdrop-blur-sm overflow-y-auto flex flex-col
+                    ${recetaActiva === receta.id 
+                      ? 'opacity-100 translate-y-0' // Condición activada por dedo (iPhone)
+                      : 'opacity-0 translate-y-8 md:group-hover:opacity-100 md:group-hover:translate-y-0' // Condición activada por mouse (Mac)
+                    }
+                  `}
+                >
+                  {/* Este contenedor usa my-auto para un centrado seguro que no corta el texto */}
+                  <div className="my-auto w-full">
+                    <div className="flex flex-col items-center justify-center w-full mb-6 mt-2">
+                      <ChefHat size={36} className="text-brand-yellow mb-2 shrink-0" />
+                      <h5 className="text-xl md:text-2xl font-black text-brand-yellow text-center leading-tight">
+                        ¿Cómo prepararlo?
+                      </h5>
+                    </div>
+                    <p className="text-white font-bold text-sm md:text-base leading-relaxed whitespace-pre-line text-left pb-4">
+                      {receta.instrucciones}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}

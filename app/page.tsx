@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, Variants } from 'framer-motion';
-import { Leaf, Truck, Star, Phone, MapPin, Clock, ArrowRight, EggFried, LeafIcon, Space, Slash, Tally1, Tally2, Tally4, Circle, CircleSmall } from 'lucide-react';
+import { Leaf, Truck, Star, Phone, MapPin, Clock, ArrowRight, EggFried, LeafIcon, Space, Slash, Tally1, Tally2, Tally4, Circle, CircleSmall, Mail } from 'lucide-react';
 import { LampContainer } from '../components/ui/lamp';
 import { AuroraButton } from '../components/ui/aurora-button';
 import Image from 'next/image';
@@ -71,7 +71,7 @@ export default function Home() {
             <a href="/recetas" className="hover:text-brand-yellow transition-colors">Recetas</a>
             <a href="#productos" className="hover:text-brand-yellow transition-colors">Productos</a>
             <a href="#historia" className="hover:text-brand-yellow transition-colors">Historia</a>
-            <a href="#contacto" className="hover:text-brand-yellow transition-colors">Contacto</a>
+            <a href="#contacto" className="hover:text-brand-yellow transition-colors">Pedidos</a>
           </div>
         </div>
       </motion.nav>
@@ -215,6 +215,9 @@ export default function Home() {
                 <div className="flex items-center gap-3 md:gap-4 bg-brand-red text-white p-4 rounded-xl">
                   <Phone className="text-brand-yellow shrink-0" /> <span>2282 10 53 30 </span>
                   <CircleSmall className="text-brand-yellow shrink-0" /> <span> 2283 57 60 92</span>
+                </div>
+                 <div className="flex items-center gap-3 md:gap-4 bg-brand-red text-white p-4 rounded-xl">
+                  <Mail className="text-brand-yellow shrink-0" /> <span>pollosjuacost@gmail.com </span>
                 </div>
                 <div className="flex items-center gap-3 md:gap-4 bg-brand-red text-white p-4 rounded-xl">
                   <MapPin className="text-brand-yellow shrink-0" /> <span>Hidalgo #73, Banderilla Centro</span>
