@@ -101,8 +101,7 @@ export default function Home() {
             <h1 className="text-[3.2rem] sm:text-[4rem] md:text-[6rem] lg:text-[7.5rem] font-black tracking-tighter leading-[0.85] mb-6 md:mb-8 max-w-[100vw] overflow-hidden px-2">
               <span className="text-brand-yellow drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">FRESCO,</span> <br/>
               <span className="text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">ORGÁNICO</span> <br/>
-              <span className="text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]"></span> <br/>
-              <span className="text-brand-yellow drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">SIN HORMONAS</span>
+              <span className="text-brand-yellow drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">& SIN HORMONAS</span>
             </h1>
             
             {/* Subtítulo más limpio y legible */}
