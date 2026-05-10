@@ -156,7 +156,7 @@ export default function RecetasPage() {
 
       <ScrollExpandMedia
         mediaType="image"
-        mediaSrc="/recetas/hero-pollo.avif" 
+        mediaSrc="/recetas/hero-pollo3.avif" 
         bgImageSrc="/recetas/hero-bg.avif"
         title="RECETAS DELICIOSAS"
         date="JUACost"
