@@ -106,7 +106,7 @@ export default function Home() {
             
             {/* Subtítulo más limpio y legible */}
             <p className="text-base md:text-2xl text-white/90 font-medium max-w-[90%] md:max-w-2xl mx-auto mb-8 md:mb-12 drop-shadow-md px-2 leading-relaxed">
-              De la granja a tu mesa. Especialistas en pollo de alta calidad y huevo orgánico para familias y negocios.
+              De la granja a tu mesa. Especialistas en pollo de alta calidad y huevo orgánico para familias y negocios desde hace más de 30 años.
             </p>
             
             {/* Botón con micro-interacción en la flecha */}
@@ -147,7 +147,7 @@ export default function Home() {
               <ul className="space-y-3 md:space-y-4 font-bold relative z-10 text-sm md:text-base">
                 <li className="flex items-center gap-3"><Star className="w-5 h-5 md:w-6 md:h-6" /> Calidad Premium</li>
                 <li className="flex items-center gap-3"><Truck className="w-5 h-5 md:w-6 md:h-6" /> Entrega a Domicilio</li>
-                <li className="flex items-center gap-3"><Leaf className="w-5 h-5 md:w-6 md:h-6" /> Sin conservadores</li>
+                <li className="flex items-center gap-3"><Leaf className="w-5 h-5 md:w-6 md:h-6" /> Sin hormonas</li>
               </ul>
             </motion.div>
 
@@ -157,9 +157,9 @@ export default function Home() {
                 <Star size={150} className="md:w-[200px] md:h-[200px]" />
               </div>
               <h3 className="text-3xl md:text-4xl font-black mb-4 relative z-10 text-brand-red">HUEVO ORGÁNICO</h3>
-              <p className="text-base md:text-lg font-bold mb-6 md:mb-8 relative z-10">Gallinas libres de jaula, alimentación natural. Un color y sabor que resalta en cualquier platillo.</p>
+              <p className="text-base md:text-lg font-bold mb-6 md:mb-8 relative z-10">Gallinas de libre pastoreo, alimentación natural. Un color y sabor que resalta en cualquier platillo.</p>
               <ul className="space-y-3 md:space-y-4 font-bold relative z-10 text-sm md:text-base">
-                <li className="flex items-center gap-3"><Star className="w-5 h-5 md:w-6 md:h-6" /> 100% Orgánico Certificado</li>
+                <li className="flex items-center gap-3"><Star className="w-5 h-5 md:w-6 md:h-6" /> 100% Orgánico </li>
                 <li className="flex items-center gap-3"><Truck className="w-5 h-5 md:w-6 md:h-6" /> Venta por Cono o Caja</li>
                 <li className="flex items-center gap-3"><Leaf className="w-5 h-5 md:w-6 md:h-6" /> Yema rica en nutrientes</li>
               </ul>
