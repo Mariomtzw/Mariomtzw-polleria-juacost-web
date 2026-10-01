@@ -1,230 +1,198 @@
 "use client";
 
-import React, { useState } from 'react'; // <-- IMPORTANTE ESTE CAMBIO
-import ScrollExpandMedia from '@/components/ui/scroll-expansion-hero';
-import { ArrowLeft, Clock, Users, ChefHat } from 'lucide-react';
-import Link from 'next/link';
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { MotionConfig } from "framer-motion";
+import { ArrowLeft, ChefHat, Clock, ListOrdered, ShoppingBasket, Timer, Users, X } from "lucide-react";
+import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
+import { recetas, type Receta } from "./recetas-data";
 
-// Arreglo de datos para mantener el código limpio y fácil de editar
-const recetasData = [
-  {
-    id: 1,
-    titulo: "Pollo Rostizado a las Finas Hierbas",
-    desc: "Un clásico infalible. Jugoso por dentro y crujiente por fuera.",
-    tiempo: "1.5 hrs",
-    porc: "4 Porc.",
-    img: "/recetas/receta-1.avif",
-    color: "blanco",
-    instrucciones: "🛒 INGREDIENTES:\n• 1 Pollo entero limpio (aprox. 2 kg)\n• 50g de mantequilla a temperatura ambiente\n• 3 Dientes de ajo finamente picados\n• 1 Cda. de romero y tomillo fresco\n\n⏱️ COCCIÓN: Horno a 200°C por 1h 15m.\n\n👨‍🍳 PASO A PASO:\n1. Seca perfectamente el pollo con toallas de papel.\n2. Unta la mezcla de mantequilla, ajo, hierbas, sal y pimienta por debajo de la piel y por fuera.\n3. Hornea bañándolo con sus propios jugos cada 20 minutos.\n4. Retira y deja reposar 10 minutos antes de cortar."
-  },
-  {
-    id: 2,
-    titulo: "Caldo de Pollo Reconfortante",
-    desc: "El abrazo tradicional. Preparado con piezas frescas y verduras.",
-    tiempo: "45 min",
-    porc: "6 Porc.",
-    img: "/recetas/receta-2.avif",
-    color: "amarillo",
-    instrucciones: "🛒 INGREDIENTES:\n• 1 kg de piezas de pollo (pierna y muslo)\n• 2 Zanahorias y 2 papas en cubos\n• 1 Chayote en cubos\n• 1/2 Cebolla, 1 ajo y ramitas de cilantro\n\n⏱️ COCCIÓN: Fuego medio por 35-40 min.\n\n👨‍🍳 PASO A PASO:\n1. En una olla grande, hierve agua con la cebolla, el ajo y sal al gusto.\n2. Agrega las piezas de pollo limpias y retira la espuma que se forme arriba tras 15 min.\n3. Incorpora toda la verdura picada.\n4. Cocina por 20 minutos más o hasta que la verdura esté suave. Sirve con cilantro fresco y limón."
-  },
-  {
-    id: 3,
-    titulo: "Pechugas Rellenas de Espinaca",
-    desc: "Perfectas para una cena elegante o comer sano y delicioso.",
-    tiempo: "30 min",
-    porc: "2 Porc.",
-    img: "/recetas/receta-3.avif",
-    color: "blanco",
-    instrucciones: "🛒 INGREDIENTES:\n• 2 Pechugas abiertas en mariposa\n• 1 Taza de espinacas baby frescas\n• 100g de queso asadero o manchego\n• 1 Cda. de aceite de oliva\n\n⏱️ COCCIÓN: Sartén a fuego medio por 15 min.\n\n👨‍🍳 PASO A PASO:\n1. Salpimienta las pechugas por ambos lados.\n2. Coloca en el centro una cama de espinacas y el queso rallado.\n3. Dobla la pechuga y ciérrala asegurando las orillas con palillos de madera.\n4. Sella en el sartén caliente por 7-8 minutos de cada lado hasta que doren y el queso gratine."
-  },
-  {
-    id: 4,
-    titulo: "Enchiladas Suizas de Pollo",
-    desc: "Rellenas de pollo deshebrado, bañadas en salsa verde cremosa.",
-    tiempo: "40 min",
-    porc: "4 Porc.",
-    img: "/recetas/receta-4.avif",
-    color: "amarillo",
-    instrucciones: "🛒 INGREDIENTES:\n• 500g de pechuga cocida y deshebrada\n• 12 Tortillas de maíz\n• 500g de tomate verde y 2 chiles serranos\n• 1/2 Taza de crema y 150g de queso manchego\n\n⏱️ COCCIÓN: Horno a 180°C por 10 min.\n\n👨‍🍳 PASO A PASO:\n1. Hierve los tomates y chiles. Licúalos con la crema, cilantro, ajo y sal.\n2. Pasa las tortillas ligeramente por aceite caliente para suavizarlas.\n3. Rellénalas con el pollo deshebrado y acomódalas en un refractario.\n4. Baña con la salsa verde, espolvorea el queso y hornea hasta gratinar."
-  },
-  {
-    id: 5,
-    titulo: "Huevos Orgánicos Rancheros",
-    desc: "Nuestro huevo fresco sobre tortilla frita, bañados en salsa roja.",
-    tiempo: "15 min",
-    porc: "1 Porc.",
-    img: "/recetas/receta-5.avif",
-    color: "blanco",
-    instrucciones: "🛒 INGREDIENTES:\n• 2 Huevos orgánicos JUACost\n• 2 Tortillas de maíz\n• 1 Taza de salsa roja de molcajete caliente\n• Frijoles refritos para acompañar\n\n⏱️ COCCIÓN: Sartén a fuego medio-alto por 5 min.\n\n👨‍🍳 PASO A PASO:\n1. En un sartén con un poco de aceite, fríe las tortillas hasta que estén semi-doradas. Retira y reserva.\n2. En ese mismo sartén, estrella los dos huevos y cocínalos a tu término favorito (tierno o bien cocido).\n3. Unta frijoles en las tortillas, coloca un huevo sobre cada una.\n4. Baña generosamente con la salsa roja caliente."
-  },
-  {
-    id: 6,
-    titulo: "Milanesa de Pollo Crujiente",
-    desc: "Pechuga perfectamente aplanada y empanizada, el favorito de todos.",
-    tiempo: "25 min",
-    porc: "2 Porc.",
-    img: "/recetas/receta-6.avif",
-    color: "amarillo",
-    instrucciones: "🛒 INGREDIENTES:\n• 2 Milanesas de pechuga de pollo\n• 2 Huevos orgánicos JUACost batidos\n• 1 Taza de pan molido o panko\n• 1/2 Taza de harina de trigo\n\n⏱️ COCCIÓN: Freído a 170°C por 8 min.\n\n👨‍🍳 PASO A PASO:\n1. Salpimienta las milanesas.\n2. Pásalas por la harina (sacudiendo el exceso), luego sumérgelas en el huevo batido y finalmente cúbrelas bien con el pan molido.\n3. Fríe en abundante aceite caliente por unos 4 minutos de cada lado hasta lograr un dorado perfecto.\n4. Escurre sobre papel absorbente."
-  },
-  {
-    id: 7,
-    titulo: "Tostadas de Tinga",
-    desc: "Pechuga deshebrada guisada a fuego lento con jitomate y chipotle.",
-    tiempo: "45 min",
-    porc: "6 Porc.",
-    img: "/recetas/receta-7.avif",
-    color: "blanco",
-    instrucciones: "🛒 INGREDIENTES:\n• 500g de pechuga cocida y deshebrada\n• 2 Cebollas blancas fileteadas\n• 4 Jitomates hervidos\n• 2 Chiles chipotle de lata\n\n⏱️ COCCIÓN: Guisado a fuego medio por 20 min.\n\n👨‍🍳 PASO A PASO:\n1. Licúa los jitomates con el chipotle, un ajo, sal y un chorrito del caldo de pollo.\n2. En una cacerola, sofríe la cebolla fileteada con aceite hasta que esté muy suave y transparente (aprox. 10 min).\n3. Vierte la salsa de la licuadora sobre la cebolla y deja hervir.\n4. Agrega el pollo deshebrado, revuelve bien y cocina por 10 min a fuego bajo para que absorba el sabor."
-  },
-  {
-    id: 8,
-    titulo: "Omelette Relleno",
-    desc: "Huevos batidos, rellenos de champiñones, queso y espinacas.",
-    tiempo: "10 min",
-    porc: "1 Porc.",
-    img: "/recetas/receta-8.avif",
-    color: "amarillo",
-    instrucciones: "🛒 INGREDIENTES:\n• 2 Huevos orgánicos JUACost\n• 1/2 Taza de champiñones fileteados\n• 50g de queso manchego rallado\n• Un puñado de espinacas troceadas\n\n⏱️ COCCIÓN: Sartén a fuego bajo por 4 min.\n\n👨‍🍳 PASO A PASO:\n1. Saltea rápidamente los champiñones y reserva.\n2. Bate los huevos con un tenedor, sal y pimienta.\n3. Derrite mantequilla en el sartén y vierte el huevo, esparciendo por todo el fondo.\n4. Cuando los bordes cuajen, coloca el queso, champiñones y espinacas en una sola mitad. Dobla la otra mitad por encima y deja derretir el queso."
-  },
-  {
-    id: 9,
-    titulo: "Fajitas de Pollo Norteñas",
-    desc: "Tiras de pechuga salteadas con pimientos de colores y cebolla.",
-    tiempo: "20 min",
-    porc: "3 Porc.",
-    img: "/recetas/receta-9.avif",
-    color: "blanco",
-    instrucciones: "🛒 INGREDIENTES:\n• 500g de filete de pechuga en tiras\n• 1 Pimiento morrón rojo y 1 verde en tiras\n• 1 Cebolla blanca en julianas\n• 1 Cda. de sazonador para fajitas o paprika\n\n⏱️ COCCIÓN: Salteado a fuego alto por 15 min.\n\n👨‍🍳 PASO A PASO:\n1. Sazona las tiras de pollo.\n2. En un sartén muy caliente con aceite, sella el pollo por unos 8 minutos hasta que esté casi cocido. Retira y reserva.\n3. En el mismo sartén, añade la cebolla y los pimientos; saltea por 5 minutos para que queden al dente (crujientes).\n4. Regresa el pollo, mezcla todo y cocina 2 minutos más."
-  },
-  {
-    id: 10,
-    titulo: "Alitas Picantes Búfalo",
-    desc: "Para botanear el fin de semana. Jugosas y repletas de sabor.",
-    tiempo: "40 min",
-    porc: "4 Porc.",
-    img: "/recetas/receta-10.avif",
-    color: "amarillo",
-    instrucciones: "🛒 INGREDIENTES:\n• 1 kg de alitas de pollo JUACost limpias\n• 1 Taza de salsa picante tipo Luisiana (RedHot)\n• 50g de mantequilla\n• 1/2 Taza de harina sazonada\n\n⏱️ COCCIÓN: Horno a 220°C por 35 min.\n\n👨‍🍳 PASO A PASO:\n1. Pasa las alitas secas por la harina sazonada para darles una capa ligera.\n2. Hornéalas sobre una rejilla durante 35 minutos hasta que la piel quede súper crujiente.\n3. En una olla pequeña, derrite la mantequilla y mézclala con la salsa picante caliente.\n4. Pon las alitas en un tazón grande, vierte la salsa y agita vigorosamente para bañarlas por completo."
-  },
-  {
-    id: 11,
-    titulo: "Huevos Orgánicos Ahogados",
-    desc: "Cocinados dentro de un caldillo de jitomate martajado.",
-    tiempo: "20 min",
-    porc: "2 Porc.",
-    img: "/recetas/receta-11.avif",
-    color: "blanco",
-    instrucciones: "🛒 INGREDIENTES:\n• 4 Huevos orgánicos JUACost\n• 4 Jitomates hervidos\n• 1/4 de Cebolla y 1 diente de ajo\n• 1 Chile de árbol seco (opcional)\n\n⏱️ COCCIÓN: Hervido a fuego medio por 15 min.\n\n👨‍🍳 PASO A PASO:\n1. Licúa los jitomates, cebolla y ajo con un poco de agua o caldo (que quede espeso).\n2. En una cazuela, sofríe la salsa con una cucharada de aceite y deja hervir 10 minutos.\n3. Reduce el fuego al mínimo. Casca los huevos uno por uno y déjalos caer suavemente separados dentro del caldillo hirviendo.\n4. Tapa la cazuela sin revolver nada y cocina por 5-6 min hasta que la clara esté firme."
-  },
-  {
-    id: 12,
-    titulo: "Ensalada Fresca con Pollo",
-    desc: "Ligera y nutritiva. Mix de lechugas con fajitas de pechuga.",
-    tiempo: "15 min",
-    porc: "2 Porc.",
-    img: "/recetas/receta-12.avif",
-    color: "amarillo",
-    instrucciones: "🛒 INGREDIENTES:\n• 300g de filete fino de pechuga\n• Mix de lechugas (romana y orejona)\n• 1 Taza de jitomate cherry en mitades\n• Aderezo de mostaza dulce y limón\n\n⏱️ COCCIÓN: Plancha a fuego alto por 10 min.\n\n👨‍🍳 PASO A PASO:\n1. Marina la pechuga con jugo de limón, sal, pimienta y ajo en polvo.\n2. Ásala en un sartén o plancha caliente con poco aceite durante 5 min por lado hasta lograr costra.\n3. Déjala reposar un minuto y córtala en fajitas.\n4. En un plato hondo, sirve la cama de lechuga, añade los jitomates, acomoda el pollo tibio encima y baña con el aderezo al momento de servir."
-  }
-];
+const sectionTitleClass = "mb-2 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-brand-yellow";
 
-export default function RecetasPage() {
-  // 1. CREAMOS UN ESTADO PARA SABER QUÉ RECETA SE TOCÓ EN EL CELULAR
-  const [recetaActiva, setRecetaActiva] = useState<number | null>(null);
+function RecetaCard({
+  receta,
+  open,
+  onToggle,
+  onClose,
+}: {
+  receta: Receta;
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+}) {
+  const panelId = `receta-${receta.id}-preparacion`;
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const amarillo = receta.color === "amarillo";
 
-  // 2. FUNCIÓN PARA ABRIR/CERRAR LA RECETA EN MÓVILES
-  const toggleReceta = (id: number) => {
-    if (recetaActiva === id) {
-      setRecetaActiva(null); // Si ya estaba abierta, la cierra
-    } else {
-      setRecetaActiva(id); // Si estaba cerrada, la abre
-    }
-  };
+  // Escape cierra la preparación y devuelve el foco a la tarjeta.
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      onClose();
+      triggerRef.current?.focus();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
 
   return (
-    <main className="bg-brand-red min-h-screen font-sans selection:bg-brand-yellow selection:text-brand-red">
-      
-      {/* Botón Flotante para Regresar */}
-      <div className="fixed top-6 left-6 z-50">
-        <Link href="/">
-          <button className="flex items-center gap-2 bg-brand-yellow text-brand-red px-4 py-2 rounded-full font-bold shadow-xl hover:scale-105 transition-transform text-sm md:text-base">
-            <ArrowLeft size={20} /> Volver a Inicio
-          </button>
-        </Link>
+    <article
+      className={`group relative isolate flex flex-col items-center overflow-hidden rounded-[2rem] p-6 text-center shadow-brand transition-transform duration-300 ease-out-expo hover:-translate-y-2 motion-reduce:transition-none [--focus-ring:var(--color-brand-red-dark)] ${
+        amarillo ? "bg-brand-yellow" : "bg-white"
+      }`}
+    >
+      <div className="relative mb-6 aspect-[3/2] w-full overflow-hidden rounded-xl bg-brand-red/10">
+        <Image
+          src={receta.img}
+          alt=""
+          fill
+          sizes="(min-width: 1024px) 380px, (min-width: 768px) 45vw, 90vw"
+          className="object-cover"
+        />
       </div>
 
-      <ScrollExpandMedia
-        mediaType="image"
-        mediaSrc="/recetas/hero-pollo3.avif" 
-        bgImageSrc="/recetas/hero-bg.avif"
-        title="RECETAS DELICIOSAS"
-        date="JUACost"
-        scrollToExpand="↓ Desliza hacia abajo para cocinar ↓"
+      <h3 className="mb-3 text-balance text-2xl font-black text-brand-red">{receta.titulo}</h3>
+      <p className="mb-6 text-pretty text-sm font-semibold text-brand-red-dark">{receta.desc}</p>
+
+      <div className="mt-auto flex flex-col items-center gap-3">
+        <ul className="flex gap-4 rounded-full bg-brand-red-dark px-4 py-2 text-sm font-bold text-brand-yellow">
+          <li className="flex items-center gap-1">
+            <Clock aria-hidden size={16} /> <span className="sr-only">Tiempo: </span>
+            {receta.tiempo}
+          </li>
+          <li className="flex items-center gap-1">
+            <Users aria-hidden size={16} /> <span className="sr-only">Rinde: </span>
+            {receta.porc}
+          </li>
+        </ul>
+
+        {/* El ::after estira el botón a toda la tarjeta: tocar cualquier parte abre la receta. */}
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          aria-controls={panelId}
+          className="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-2 text-sm font-black text-brand-red-dark underline decoration-2 underline-offset-4 after:absolute after:inset-0 after:rounded-[2rem]"
+        >
+          <ChefHat aria-hidden size={18} className="shrink-0" />
+          Ver preparación
+          <span className="sr-only"> de {receta.titulo}</span>
+        </button>
+      </div>
+
+      {/* Capa de preparación: se muestra al abrir (clic, toque o teclado) y como
+          vista previa al pasar el cursor en equipos con mouse; un clic sobre ella
+          la fija o la cierra. Con visibility oculta no entra al orden de
+          tabulación ni la leen los lectores de pantalla. */}
+      <div
+        id={panelId}
+        role="region"
+        aria-label={`Preparación de ${receta.titulo}`}
+        tabIndex={open ? 0 : -1}
+        onClick={onToggle}
+        className={`absolute inset-0 z-10 flex cursor-pointer flex-col overflow-y-auto overscroll-contain rounded-[2rem] bg-brand-red-dark/95 p-6 text-left -outline-offset-4 backdrop-blur-sm transition-[opacity,translate,visibility] duration-300 ease-out-expo [--focus-ring:var(--color-brand-yellow)] [scrollbar-color:var(--color-brand-yellow)_transparent] [scrollbar-width:thin] motion-reduce:transition-none ${
+          open
+            ? "visible translate-y-0 opacity-100"
+            : "invisible translate-y-6 opacity-0 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
+        }`}
       >
-        
-        {/* Grid de Recetas */}
-        <div className="max-w-7xl mx-auto w-full pt-12 px-4">
-          <h3 className="text-4xl md:text-5xl font-black text-brand-yellow mb-12 text-center drop-shadow-md">
-            INSPIRACIÓN PARA TU MESA
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
-            
-            {recetasData.map((receta) => (
-              <div 
-                key={receta.id} 
-                onClick={() => toggleReceta(receta.id)} // <-- 3. AGREGAMOS EL EVENTO CLICK/TAP
-                className={`relative cursor-pointer rounded-[2rem] p-6 shadow-2xl flex flex-col items-center text-center group transition-transform md:hover:-translate-y-2 overflow-hidden ${
-                  receta.color === "blanco" ? "bg-white" : "bg-brand-yellow"
-                }`}
+        <div className="my-auto w-full text-white">
+          <div className="mb-5 flex items-start justify-between gap-3">
+            <h4 className="flex items-center gap-2 text-xl font-black leading-tight text-brand-yellow">
+              <ChefHat aria-hidden size={26} className="shrink-0" />
+              ¿Cómo prepararlo?
+            </h4>
+            {open && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                  triggerRef.current?.focus();
+                }}
+                aria-label="Cerrar preparación"
+                className="-mt-1 -mr-1 shrink-0 cursor-pointer rounded-full p-2 text-white hover:bg-white/15"
               >
-                {/* Imagen del platillo */}
-                <div className={`w-full h-48 rounded-xl overflow-hidden mb-6 relative z-10 ${receta.color === "amarillo" ? "border-4 border-brand-red/20" : ""}`}>
-                  <img src={receta.img} alt={receta.titulo} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"/>
-                </div>
-                
-                {/* Títulos y Descripción */}
-                <div className="relative z-10 flex flex-col flex-grow items-center">
-                  <h4 className="text-2xl font-black text-brand-red mb-3">{receta.titulo}</h4>
-                  <p className="text-brand-red/80 font-bold mb-6 text-sm">{receta.desc}</p>
-                </div>
-
-                {/* Footer de Tiempos y Porciones */}
-                <div className="flex gap-4 text-brand-yellow bg-brand-red px-4 py-2 rounded-full text-sm font-bold mt-auto relative z-10 shadow-md">
-                  <span className="flex items-center gap-1"><Clock size={16}/> {receta.tiempo}</span>
-                  <span className="flex items-center gap-1"><Users size={16}/> {receta.porc}</span>
-                </div>
-
-                {/* 4. CAPA DE PREPARACIÓN CON LÓGICA MIXTA (HOVER PC + TAP MÓVIL) */}
-                {/* 4. CAPA DE PREPARACIÓN CORREGIDA (SCROLL SEGURO EN MÓVILES) */}
-                <div 
-                  className={`absolute inset-0 bg-brand-red/95 p-6 transition-all duration-300 z-30 backdrop-blur-sm overflow-y-auto flex flex-col
-                    ${recetaActiva === receta.id 
-                      ? 'opacity-100 translate-y-0' // Condición activada por dedo (iPhone)
-                      : 'opacity-0 translate-y-8 md:group-hover:opacity-100 md:group-hover:translate-y-0' // Condición activada por mouse (Mac)
-                    }
-                  `}
-                >
-                  {/* Este contenedor usa my-auto para un centrado seguro que no corta el texto */}
-                  <div className="my-auto w-full">
-                    <div className="flex flex-col items-center justify-center w-full mb-6 mt-2">
-                      <ChefHat size={36} className="text-brand-yellow mb-2 shrink-0" />
-                      <h5 className="text-xl md:text-2xl font-black text-brand-yellow text-center leading-tight">
-                        ¿Cómo prepararlo?
-                      </h5>
-                    </div>
-                    <p className="text-white font-bold text-sm md:text-base leading-relaxed whitespace-pre-line text-left pb-4">
-                      {receta.instrucciones}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-
+                <X aria-hidden size={20} strokeWidth={3} />
+              </button>
+            )}
           </div>
+
+          <h5 className={sectionTitleClass}>
+            <ShoppingBasket aria-hidden size={16} className="shrink-0" /> Ingredientes
+          </h5>
+          <ul className="mb-5 list-disc space-y-1 pl-5 text-sm font-medium leading-relaxed marker:text-brand-yellow md:text-base">
+            {receta.ingredientes.map((ingrediente) => (
+              <li key={ingrediente}>{ingrediente}</li>
+            ))}
+          </ul>
+
+          <h5 className={sectionTitleClass}>
+            <Timer aria-hidden size={16} className="shrink-0" /> Cocción
+          </h5>
+          <p className="mb-5 text-sm font-medium leading-relaxed md:text-base">{receta.coccion}</p>
+
+          <h5 className={sectionTitleClass}>
+            <ListOrdered aria-hidden size={16} className="shrink-0" /> Paso a paso
+          </h5>
+          <ol className="list-decimal space-y-2 pl-5 text-sm font-medium leading-relaxed marker:font-black marker:text-brand-yellow md:text-base">
+            {receta.pasos.map((paso) => (
+              <li key={paso}>{paso}</li>
+            ))}
+          </ol>
         </div>
-      </ScrollExpandMedia>
-    </main>
+      </div>
+    </article>
+  );
+}
+
+export default function RecetasPage() {
+  // Solo una receta abierta a la vez.
+  const [recetaActiva, setRecetaActiva] = useState<number | null>(null);
+
+  return (
+    <MotionConfig reducedMotion="user">
+      <main className="site min-h-[100dvh] bg-brand-red font-sans">
+        {/* Botón flotante para regresar */}
+        <div className="fixed top-4 left-4 z-50 md:top-6 md:left-6">
+          <Link
+            href="/"
+            className="flex items-center gap-2 rounded-full bg-brand-yellow px-4 py-2.5 text-sm font-bold text-brand-red-dark shadow-brand transition-transform duration-200 hover:scale-105 active:scale-100 motion-reduce:transition-none md:text-base"
+          >
+            <ArrowLeft aria-hidden size={20} /> Volver a Inicio
+          </Link>
+        </div>
+
+        <ScrollExpandMedia
+          mediaSrc="/recetas/hero-pollo3.avif"
+          mediaAlt="Pollo rostizado con papas y romero en una sartén de hierro"
+          bgImageSrc="/recetas/hero-bg.avif"
+          title="RECETAS DELICIOSAS"
+          date="JUACost"
+          scrollToExpand="Desliza hacia abajo para cocinar"
+        >
+          <div className="mx-auto w-full max-w-7xl px-0 pt-12 md:px-4">
+            <h2 className="mb-12 text-balance text-center text-4xl font-black leading-none tracking-tight text-brand-yellow md:text-5xl">
+              INSPIRACIÓN PARA TU MESA
+            </h2>
+
+            <div className="grid grid-cols-1 gap-8 pb-20 md:grid-cols-2 lg:grid-cols-3">
+              {recetas.map((receta) => (
+                <RecetaCard
+                  key={receta.id}
+                  receta={receta}
+                  open={recetaActiva === receta.id}
+                  onToggle={() => setRecetaActiva((actual) => (actual === receta.id ? null : receta.id))}
+                  onClose={() => setRecetaActiva(null)}
+                />
+              ))}
+            </div>
+          </div>
+        </ScrollExpandMedia>
+      </main>
+    </MotionConfig>
   );
 }
