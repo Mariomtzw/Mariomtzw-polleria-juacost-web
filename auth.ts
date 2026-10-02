@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { authConfig } from "./auth.config";
 import { prisma } from "./lib/prisma";
+import { passwordVersion } from "./lib/account/tokens";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -29,7 +30,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const { email, password } = parsed.data;
 
-        const user = await prisma.user.findUnique({ where: { email } });
+        // Sin distinguir mayúsculas: el teclado del teléfono suele poner la primera en mayúscula.
+        const user = await prisma.user.findFirst({
+          where: { email: { equals: email.trim(), mode: "insensitive" } },
+        });
         if (!user || !user.isActive) return null;
 
         // Owner-only: aunque el usuario exista, si no es OWNER no entra.
@@ -48,6 +52,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           name: user.name,
           role: user.role,
+          // Huella de la contraseña vigente: si después cambia, esta sesión deja de valer.
+          pv: passwordVersion(user.passwordHash),
         };
       },
     }),

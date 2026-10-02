@@ -1,5 +1,6 @@
 import { requireOwner } from "@/lib/auth-guards";
 import { signOut } from "@/auth";
+import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { Sidebar } from "@/components/admin/Sidebar";
 
@@ -23,9 +24,14 @@ export default async function DashboardLayout({
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Barra superior fija: en el teléfono el botón de menú queda sobre ella y no encima del contenido */}
         <header className="sticky top-0 z-30 flex min-h-14 items-center justify-end gap-3 border-b border-white/10 bg-neutral-950/85 py-2 pl-16 pr-4 backdrop-blur-md md:px-6">
-          <span className="min-w-0 truncate text-xs text-neutral-400" title={session.user?.email ?? undefined}>
+          <Link
+            href="/admin/cuenta"
+            title="Mi cuenta"
+            className="min-w-0 truncate rounded text-xs text-neutral-400 underline-offset-4 hover:text-white hover:underline"
+          >
+            <span className="sr-only">Mi cuenta: </span>
             {session.user?.email}
-          </span>
+          </Link>
           <form
             action={async () => {
               "use server";
