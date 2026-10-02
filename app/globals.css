@@ -2,13 +2,34 @@
 
 @theme {
   --color-brand-red: #b92b27;
-  --color-brand-red-dark: #9a201d; /* Rojo más oscuro para sombras, sin usar negro */
+  --color-brand-red-dark: #9a201d; /* Rojo oscuro: texto pequeño sobre amarillo (4.7:1) y superficies */
+  --color-brand-red-deep: #701411; /* Solo para sombras y cantos; nunca como fondo ni texto */
   --color-brand-yellow: #fbbc1b;
   --color-brand-yellow-light: #fcd052;
+
+  /* Sombra teñida de rojo en lugar de negro puro */
+  --shadow-brand: 0 24px 48px -20px rgb(74 12 10 / 0.55);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Geist llega desde next/font (variables en <html>, ver app/layout.tsx).
+   "inline" porque el valor es otra variable CSS. */
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 html {
-  scroll-behavior: smooth;
+  /* Las anclas (#productos, #historia…) no quedan debajo de la barra fija */
+  scroll-padding-top: 5.5rem;
+  scrollbar-color: var(--color-brand-yellow) var(--color-brand-red-dark);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -18,7 +39,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Ocultar barra de desplazamiento para un look más limpio */
+/* Barra de desplazamiento con los colores de la marca */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -28,4 +49,209 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--color-brand-yellow);
   border-radius: 10px;
+}
+
+/* ===== Sitio público (.site): foco de teclado y selección con la marca =====
+   Va en @layer base para que las utilidades de Tailwind puedan sobrescribirlo.
+   Cada superficie define --focus-ring según su fondo:
+   blanco sobre rojo (por defecto), rojo oscuro sobre amarillo o blanco. */
+@layer base {
+  .site :focus-visible {
+    outline: 3px solid var(--focus-ring, #fff);
+    outline-offset: 3px;
+  }
+  .site ::selection {
+    background: var(--color-brand-yellow);
+    color: var(--color-brand-red-dark);
+  }
+}
+
+/* ===== Panel admin — estética tipo Apple (scoped: no afecta el sitio público) ===== */
+.admin {
+  font-family: system-ui, -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-optical-sizing: auto;
+}
+.admin h1 { letter-spacing: -0.021em; line-height: 1.1; }
+.admin h2, .admin h3 { letter-spacing: -0.014em; }
+
+/* Material translúcido (Apple: chrome flotante, contenido pasa por debajo) */
+.admin .material {
+  background: rgba(255,255,255,0.045);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 18px 40px -20px rgba(0,0,0,0.7);
+}
+/* Feedback inmediato al presionar */
+.admin .press { transition: transform 120ms cubic-bezier(0.2,0,0,1); }
+.admin .press:active { transform: scale(0.97); }
+
+/* Scrollbar sutil dentro del panel */
+.admin ::-webkit-scrollbar { width: 10px; height: 10px; }
+.admin ::-webkit-scrollbar-track { background: transparent; }
+.admin ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 10px; }
+.admin ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* Accesibilidad (Apple §14) */
+@media (prefers-reduced-motion: reduce) {
+  .admin *, .admin *::before, .admin *::after {
+    animation-duration: .001ms !important; transition-duration: .001ms !important;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .admin .material { background: #151515; backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (prefers-contrast: more) {
+  .admin .material { background: #0f0f0f; border-color: rgba(255,255,255,0.28); }
+}
+
+/* ===== Refuerzo de "glass"/blur y ambiente (referencia Apple) ===== */
+.admin {
+  background:
+    radial-gradient(1200px 620px at 10% -12%, rgba(217,89,38,0.12), transparent 60%),
+    radial-gradient(1000px 520px at 112% 6%, rgba(13,148,136,0.12), transparent 55%),
+    radial-gradient(900px 700px at 50% 120%, rgba(249,115,22,0.06), transparent 60%),
+    #0a0a0a;
+}
+.admin .material {
+  background: rgba(255,255,255,0.055);
+  backdrop-filter: blur(30px) saturate(185%);
+  -webkit-backdrop-filter: blur(30px) saturate(185%);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.07) inset, 0 26px 64px -26px rgba(0,0,0,0.8);
+}
+.admin aside { backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); }
+@media (prefers-reduced-transparency: reduce) {
+  .admin { background: #0a0a0a; }
+  .admin .material { background: #151515; backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+
+/* ===== Panel (.admin): piezas compartidas =====
+   Una sola definición de campo, botón y tabla para todo el panel. Van en
+   @layer components para que las utilidades de Tailwind (w-24, text-right…)
+   puedan ajustarlas en cada uso. */
+.admin { color-scheme: dark; }
+
+/* Con el panel abierto, el lienzo y la barra de desplazamiento dejan el rojo
+   del sitio público (evita el destello rojo al rebotar el scroll). */
+html:has(.admin) { background: #0a0a0a; scrollbar-color: rgba(255,255,255,0.2) transparent; }
+html:has(.admin) body { background-color: #0a0a0a; }
+html:has(.admin)::-webkit-scrollbar-track { background: #0a0a0a; }
+html:has(.admin)::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); }
+
+/* Variante casi opaca del material: para barras fijas que flotan sobre contenido */
+.admin .material.material-solid { background: rgba(20,20,20,0.94); }
+
+@layer components {
+  /* Foco de teclado: siempre visible y con el acento del panel */
+  .admin :focus-visible {
+    outline: 2px solid #fb923c;
+    outline-offset: 2px;
+  }
+
+  /* Campo de texto, número, fecha o lista */
+  .admin .field {
+    width: 100%;
+    min-height: 2.5rem;
+    border-radius: 0.625rem;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(10,10,10,0.55);
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem; /* 16 px en móvil: iOS no hace zoom al enfocar */
+    line-height: 1.25rem;
+    color: #fff;
+    transition: border-color 120ms ease-out, box-shadow 120ms ease-out;
+  }
+  @media (min-width: 48rem) {
+    .admin .field { font-size: 0.875rem; }
+  }
+  .admin .field:focus-visible {
+    outline: none;
+    border-color: #fb923c;
+    box-shadow: 0 0 0 3px rgba(249,115,22,0.35);
+  }
+  .admin .field[aria-invalid="true"] {
+    border-color: #f87171;
+    box-shadow: 0 0 0 3px rgba(248,113,113,0.25);
+  }
+  .admin .field:disabled { opacity: 0.5; cursor: not-allowed; }
+  .admin .field-num { text-align: right; font-variant-numeric: tabular-nums; }
+  .admin .field-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: #a3a3a3;
+  }
+
+  /* Botones */
+  .admin .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    border: 1px solid transparent;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 120ms ease-out, border-color 120ms ease-out,
+      color 120ms ease-out, transform 120ms cubic-bezier(0.2,0,0,1);
+  }
+  .admin .btn:active { transform: scale(0.97); }
+  .admin .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .admin .btn-primary { background: #f97316; color: #0a0a0a; }
+  .admin .btn-secondary {
+    border-color: rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    color: #e5e5e5;
+  }
+  .admin .btn-ghost { color: #a3a3a3; }
+  .admin .btn-danger {
+    border-color: rgba(248,113,113,0.45);
+    background: rgba(239,68,68,0.16);
+    color: #fca5a5;
+  }
+  .admin .btn-sm { min-height: 2rem; border-radius: 0.625rem; padding: 0.25rem 0.625rem; font-size: 0.75rem; }
+  .admin .btn-icon { width: 2.5rem; padding: 0; }
+  .admin .btn-icon.btn-sm { width: 2rem; }
+  @media (hover: hover) {
+    .admin .field:hover:not(:disabled) { border-color: rgba(255,255,255,0.28); }
+    .admin .btn-primary:hover:not(:disabled) { background: #fb923c; }
+    .admin .btn-secondary:hover:not(:disabled) { background: rgba(255,255,255,0.11); }
+    .admin .btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,0.07); color: #fff; }
+    .admin .btn-danger:hover:not(:disabled) { background: rgba(239,68,68,0.26); }
+  }
+
+  /* Tablas del panel: encabezado discreto, filas con separador fino */
+  /* position: relative => los textos solo-para-lector (sr-only, absolutos) quedan
+     dentro de la tabla y no ensanchan la página cuando la tabla se desplaza. */
+  .admin .table { position: relative; width: 100%; font-size: 0.875rem; line-height: 1.25rem; }
+  .admin .table thead th {
+    padding: 0.75rem;
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #a3a3a3;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    white-space: nowrap;
+  }
+  .admin .table tbody > tr > * { padding: 0.625rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .admin .table tbody > tr:last-child > * { border-bottom: 0; }
+  .admin .table tfoot td { padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.1); font-weight: 500; color: #fff; }
+  .admin .table .num { text-align: right; font-variant-numeric: tabular-nums; }
+  /* Primera columna fija al desplazar la tabla hacia los lados */
+  .admin .table .sticky-col { position: sticky; left: 0; z-index: 1; background: #171717; }
+  @media (hover: hover) {
+    .admin .table tbody > tr:hover > * { background: rgba(255,255,255,0.03); }
+    .admin .table tbody > tr:hover > .sticky-col { background: #1c1c1c; }
+  }
 }

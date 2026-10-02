@@ -1,0 +1,283 @@
+// Recetas del sitio público. Para agregar una: copia un bloque, cambia el id
+// y sube la foto a /public/recetas/.
+
+export interface Receta {
+  id: number;
+  titulo: string;
+  desc: string;
+  tiempo: string;
+  porc: string;
+  img: string;
+  /** Color de la tarjeta; se alternan para dar ritmo a la rejilla. */
+  color: "blanco" | "amarillo";
+  ingredientes: string[];
+  coccion: string;
+  pasos: string[];
+}
+
+export const recetas: Receta[] = [
+  {
+    id: 1,
+    titulo: "Pollo Rostizado a las Finas Hierbas",
+    desc: "Un clásico infalible. Jugoso por dentro y crujiente por fuera.",
+    tiempo: "1.5 hrs",
+    porc: "4 Porc.",
+    img: "/recetas/receta-1.avif",
+    color: "blanco",
+    ingredientes: [
+      "1 Pollo entero limpio (aprox. 2 kg)",
+      "50g de mantequilla a temperatura ambiente",
+      "3 Dientes de ajo finamente picados",
+      "1 Cda. de romero y tomillo fresco",
+    ],
+    coccion: "Horno a 200°C por 1h 15m.",
+    pasos: [
+      "Seca perfectamente el pollo con toallas de papel.",
+      "Unta la mezcla de mantequilla, ajo, hierbas, sal y pimienta por debajo de la piel y por fuera.",
+      "Hornea bañándolo con sus propios jugos cada 20 minutos.",
+      "Retira y deja reposar 10 minutos antes de cortar.",
+    ],
+  },
+  {
+    id: 2,
+    titulo: "Caldo de Pollo Reconfortante",
+    desc: "El abrazo tradicional. Preparado con piezas frescas y verduras.",
+    tiempo: "45 min",
+    porc: "6 Porc.",
+    img: "/recetas/receta-2.avif",
+    color: "amarillo",
+    ingredientes: [
+      "1 kg de piezas de pollo (pierna y muslo)",
+      "2 Zanahorias y 2 papas en cubos",
+      "1 Chayote en cubos",
+      "1/2 Cebolla, 1 ajo y ramitas de cilantro",
+    ],
+    coccion: "Fuego medio por 35-40 min.",
+    pasos: [
+      "En una olla grande, hierve agua con la cebolla, el ajo y sal al gusto.",
+      "Agrega las piezas de pollo limpias y retira la espuma que se forme arriba tras 15 min.",
+      "Incorpora toda la verdura picada.",
+      "Cocina por 20 minutos más o hasta que la verdura esté suave. Sirve con cilantro fresco y limón.",
+    ],
+  },
+  {
+    id: 3,
+    titulo: "Pechugas Rellenas de Espinaca",
+    desc: "Perfectas para una cena elegante o comer sano y delicioso.",
+    tiempo: "30 min",
+    porc: "2 Porc.",
+    img: "/recetas/receta-3.avif",
+    color: "blanco",
+    ingredientes: [
+      "2 Pechugas abiertas en mariposa",
+      "1 Taza de espinacas baby frescas",
+      "100g de queso asadero o manchego",
+      "1 Cda. de aceite de oliva",
+    ],
+    coccion: "Sartén a fuego medio por 15 min.",
+    pasos: [
+      "Salpimienta las pechugas por ambos lados.",
+      "Coloca en el centro una cama de espinacas y el queso rallado.",
+      "Dobla la pechuga y ciérrala asegurando las orillas con palillos de madera.",
+      "Sella en el sartén caliente por 7-8 minutos de cada lado hasta que doren y el queso gratine.",
+    ],
+  },
+  {
+    id: 4,
+    titulo: "Enchiladas Suizas de Pollo",
+    desc: "Rellenas de pollo deshebrado, bañadas en salsa verde cremosa.",
+    tiempo: "40 min",
+    porc: "4 Porc.",
+    img: "/recetas/receta-4.avif",
+    color: "amarillo",
+    ingredientes: [
+      "500g de pechuga cocida y deshebrada",
+      "12 Tortillas de maíz",
+      "500g de tomate verde y 2 chiles serranos",
+      "1/2 Taza de crema y 150g de queso manchego",
+    ],
+    coccion: "Horno a 180°C por 10 min.",
+    pasos: [
+      "Hierve los tomates y chiles. Licúalos con la crema, cilantro, ajo y sal.",
+      "Pasa las tortillas ligeramente por aceite caliente para suavizarlas.",
+      "Rellénalas con el pollo deshebrado y acomódalas en un refractario.",
+      "Baña con la salsa verde, espolvorea el queso y hornea hasta gratinar.",
+    ],
+  },
+  {
+    id: 5,
+    titulo: "Huevos Orgánicos Rancheros",
+    desc: "Nuestro huevo fresco sobre tortilla frita, bañados en salsa roja.",
+    tiempo: "15 min",
+    porc: "1 Porc.",
+    img: "/recetas/receta-5.avif",
+    color: "blanco",
+    ingredientes: [
+      "2 Huevos orgánicos JUACost",
+      "2 Tortillas de maíz",
+      "1 Taza de salsa roja de molcajete caliente",
+      "Frijoles refritos para acompañar",
+    ],
+    coccion: "Sartén a fuego medio-alto por 5 min.",
+    pasos: [
+      "En un sartén con un poco de aceite, fríe las tortillas hasta que estén semi-doradas. Retira y reserva.",
+      "En ese mismo sartén, estrella los dos huevos y cocínalos a tu término favorito (tierno o bien cocido).",
+      "Unta frijoles en las tortillas, coloca un huevo sobre cada una.",
+      "Baña generosamente con la salsa roja caliente.",
+    ],
+  },
+  {
+    id: 6,
+    titulo: "Milanesa de Pollo Crujiente",
+    desc: "Pechuga perfectamente aplanada y empanizada, el favorito de todos.",
+    tiempo: "25 min",
+    porc: "2 Porc.",
+    img: "/recetas/receta-6.avif",
+    color: "amarillo",
+    ingredientes: [
+      "2 Milanesas de pechuga de pollo",
+      "2 Huevos orgánicos JUACost batidos",
+      "1 Taza de pan molido o panko",
+      "1/2 Taza de harina de trigo",
+    ],
+    coccion: "Freído a 170°C por 8 min.",
+    pasos: [
+      "Salpimienta las milanesas.",
+      "Pásalas por la harina (sacudiendo el exceso), luego sumérgelas en el huevo batido y finalmente cúbrelas bien con el pan molido.",
+      "Fríe en abundante aceite caliente por unos 4 minutos de cada lado hasta lograr un dorado perfecto.",
+      "Escurre sobre papel absorbente.",
+    ],
+  },
+  {
+    id: 7,
+    titulo: "Tostadas de Tinga",
+    desc: "Pechuga deshebrada guisada a fuego lento con jitomate y chipotle.",
+    tiempo: "45 min",
+    porc: "6 Porc.",
+    img: "/recetas/receta-7.avif",
+    color: "blanco",
+    ingredientes: [
+      "500g de pechuga cocida y deshebrada",
+      "2 Cebollas blancas fileteadas",
+      "4 Jitomates hervidos",
+      "2 Chiles chipotle de lata",
+    ],
+    coccion: "Guisado a fuego medio por 20 min.",
+    pasos: [
+      "Licúa los jitomates con el chipotle, un ajo, sal y un chorrito del caldo de pollo.",
+      "En una cacerola, sofríe la cebolla fileteada con aceite hasta que esté muy suave y transparente (aprox. 10 min).",
+      "Vierte la salsa de la licuadora sobre la cebolla y deja hervir.",
+      "Agrega el pollo deshebrado, revuelve bien y cocina por 10 min a fuego bajo para que absorba el sabor.",
+    ],
+  },
+  {
+    id: 8,
+    titulo: "Omelette Relleno",
+    desc: "Huevos batidos, rellenos de champiñones, queso y espinacas.",
+    tiempo: "10 min",
+    porc: "1 Porc.",
+    img: "/recetas/receta-8.avif",
+    color: "amarillo",
+    ingredientes: [
+      "2 Huevos orgánicos JUACost",
+      "1/2 Taza de champiñones fileteados",
+      "50g de queso manchego rallado",
+      "Un puñado de espinacas troceadas",
+    ],
+    coccion: "Sartén a fuego bajo por 4 min.",
+    pasos: [
+      "Saltea rápidamente los champiñones y reserva.",
+      "Bate los huevos con un tenedor, sal y pimienta.",
+      "Derrite mantequilla en el sartén y vierte el huevo, esparciendo por todo el fondo.",
+      "Cuando los bordes cuajen, coloca el queso, champiñones y espinacas en una sola mitad. Dobla la otra mitad por encima y deja derretir el queso.",
+    ],
+  },
+  {
+    id: 9,
+    titulo: "Fajitas de Pollo Norteñas",
+    desc: "Tiras de pechuga salteadas con pimientos de colores y cebolla.",
+    tiempo: "20 min",
+    porc: "3 Porc.",
+    img: "/recetas/receta-9.avif",
+    color: "blanco",
+    ingredientes: [
+      "500g de filete de pechuga en tiras",
+      "1 Pimiento morrón rojo y 1 verde en tiras",
+      "1 Cebolla blanca en julianas",
+      "1 Cda. de sazonador para fajitas o paprika",
+    ],
+    coccion: "Salteado a fuego alto por 15 min.",
+    pasos: [
+      "Sazona las tiras de pollo.",
+      "En un sartén muy caliente con aceite, sella el pollo por unos 8 minutos hasta que esté casi cocido. Retira y reserva.",
+      "En el mismo sartén, añade la cebolla y los pimientos; saltea por 5 minutos para que queden al dente (crujientes).",
+      "Regresa el pollo, mezcla todo y cocina 2 minutos más.",
+    ],
+  },
+  {
+    id: 10,
+    titulo: "Alitas Picantes Búfalo",
+    desc: "Para botanear el fin de semana. Jugosas y repletas de sabor.",
+    tiempo: "40 min",
+    porc: "4 Porc.",
+    img: "/recetas/receta-10.avif",
+    color: "amarillo",
+    ingredientes: [
+      "1 kg de alitas de pollo JUACost limpias",
+      "1 Taza de salsa picante tipo Luisiana (RedHot)",
+      "50g de mantequilla",
+      "1/2 Taza de harina sazonada",
+    ],
+    coccion: "Horno a 220°C por 35 min.",
+    pasos: [
+      "Pasa las alitas secas por la harina sazonada para darles una capa ligera.",
+      "Hornéalas sobre una rejilla durante 35 minutos hasta que la piel quede súper crujiente.",
+      "En una olla pequeña, derrite la mantequilla y mézclala con la salsa picante caliente.",
+      "Pon las alitas en un tazón grande, vierte la salsa y agita vigorosamente para bañarlas por completo.",
+    ],
+  },
+  {
+    id: 11,
+    titulo: "Huevos Orgánicos Ahogados",
+    desc: "Cocinados dentro de un caldillo de jitomate martajado.",
+    tiempo: "20 min",
+    porc: "2 Porc.",
+    img: "/recetas/receta-11.avif",
+    color: "blanco",
+    ingredientes: [
+      "4 Huevos orgánicos JUACost",
+      "4 Jitomates hervidos",
+      "1/4 de Cebolla y 1 diente de ajo",
+      "1 Chile de árbol seco (opcional)",
+    ],
+    coccion: "Hervido a fuego medio por 15 min.",
+    pasos: [
+      "Licúa los jitomates, cebolla y ajo con un poco de agua o caldo (que quede espeso).",
+      "En una cazuela, sofríe la salsa con una cucharada de aceite y deja hervir 10 minutos.",
+      "Reduce el fuego al mínimo. Casca los huevos uno por uno y déjalos caer suavemente separados dentro del caldillo hirviendo.",
+      "Tapa la cazuela sin revolver nada y cocina por 5-6 min hasta que la clara esté firme.",
+    ],
+  },
+  {
+    id: 12,
+    titulo: "Ensalada Fresca con Pollo",
+    desc: "Ligera y nutritiva. Mix de lechugas con fajitas de pechuga.",
+    tiempo: "15 min",
+    porc: "2 Porc.",
+    img: "/recetas/receta-12.avif",
+    color: "amarillo",
+    ingredientes: [
+      "300g de filete fino de pechuga",
+      "Mix de lechugas (romana y orejona)",
+      "1 Taza de jitomate cherry en mitades",
+      "Aderezo de mostaza dulce y limón",
+    ],
+    coccion: "Plancha a fuego alto por 10 min.",
+    pasos: [
+      "Marina la pechuga con jugo de limón, sal, pimienta y ajo en polvo.",
+      "Ásala en un sartén o plancha caliente con poco aceite durante 5 min por lado hasta lograr costra.",
+      "Déjala reposar un minuto y córtala en fajitas.",
+      "En un plato hondo, sirve la cama de lechuga, añade los jitomates, acomoda el pollo tibio encima y baña con el aderezo al momento de servir.",
+    ],
+  },
+];

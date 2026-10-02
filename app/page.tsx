@@ -1,294 +1,396 @@
 "use client";
 
-import React, { useState } from 'react';
-import { motion, Variants } from 'framer-motion';
-import { Leaf, Truck, Star, Phone, MapPin, Clock, ArrowRight, EggFried, LeafIcon, Space, Slash, Tally1, Tally2, Tally4, Circle, CircleSmall, Mail } from 'lucide-react';
-import { LampContainer } from '../components/ui/lamp';
-import { AuroraButton } from '../components/ui/aurora-button';
-import Image from 'next/image';
+import { useState, type FormEvent } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion, MotionConfig, type Variants } from "framer-motion";
+import { Leaf, Truck, Star, Phone, MapPin, Clock, ArrowRight, EggFried, Mail } from "lucide-react";
+import { LampContainer } from "@/components/ui/lamp";
+import { AuroraButton } from "@/components/ui/aurora-button";
+import { SITE, whatsappUrl } from "@/lib/site";
 
-// Variantes de animación
+// Entrada rápida que desacelera al final (ver --ease-out-expo en globals.css).
+const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
+
 const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeInOut" } }
+  hidden: { opacity: 0, y: 28 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE_OUT_EXPO } },
 };
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.2 }
-  }
+  visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
 };
+
+const NAV_LINKS = [
+  { href: "#inicio", label: "Inicio", hideOnMobile: true }, // en móvil el logo ya lleva a Inicio
+  { href: "/recetas", label: "Recetas" },
+  { href: "#productos", label: "Productos" },
+  { href: "#historia", label: "Historia" },
+  { href: "#contacto", label: "Pedidos" },
+] as const;
+
+const navLinkClass =
+  "block rounded-full px-1 py-3.5 text-[0.6875rem] font-bold uppercase -outline-offset-2 tracking-wide text-white transition-colors hover:text-brand-yellow min-[400px]:px-2 min-[400px]:text-xs md:px-3 md:py-3 md:text-sm md:tracking-wider";
+
+const fieldClass =
+  "w-full rounded-xl bg-brand-yellow/20 p-4 text-base font-semibold text-brand-red-dark placeholder:font-medium placeholder:text-brand-red-dark/80";
+
+const labelClass = "mb-1.5 block text-sm font-bold text-brand-red-dark";
+
+const contactLinkClass = "rounded-sm underline-offset-4 hover:underline";
 
 export default function Home() {
-  const [nombre, setNombre] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [direccion, setDireccion] = useState('');
-  const [pedido, setPedido] = useState('');
+  const [nombre, setNombre] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [direccion, setDireccion] = useState("");
+  const [pedido, setPedido] = useState("");
 
-  const enviarWhatsApp = (e: React.FormEvent) => {
+  const enviarWhatsApp = (e: FormEvent) => {
     e.preventDefault();
-    const numero = "2283576092"; // Recuerda poner tu número real
-    
-    // Agregamos la dirección al mensaje
-    const mensaje = `Buen día, quisiera cotizar por mayoreo.%0A%0A*Nombre:* ${nombre}%0A*Teléfono:* ${telefono}%0A*Dirección de entrega:* ${direccion}%0A*Pedido:* ${pedido}`;
-    
-    const url = `https://wa.me/${numero}?text=${mensaje}`;
-    window.open(url, '_blank');
+    const mensaje = [
+      "Buen día, quisiera cotizar por mayoreo.",
+      "",
+      `*Nombre:* ${nombre}`,
+      `*Teléfono:* ${telefono}`,
+      `*Dirección de entrega:* ${direccion}`,
+      `*Pedido:* ${pedido}`,
+    ].join("\n");
+    window.open(whatsappUrl(mensaje), "_blank", "noopener,noreferrer");
   };
 
   return (
-    <main className="min-h-screen bg-brand-red font-sans selection:bg-brand-yellow selection:text-brand-red overflow-x-hidden">
-      
-      {/* NAVEGACIÓN FIJA - Adaptable a móviles */}
-      <motion.nav 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="fixed top-0 w-full bg-brand-red/90 backdrop-blur-md z-[60] border-b border-brand-yellow/30"
-      >
-        <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex justify-between items-center">
-          
-          {/* LOGO */}
-          <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-             <Image 
-               src="/logo.svg" 
-               alt="Logo Juacos't" 
-               width={40} 
-               height={40} 
-               className="object-contain hover:scale-105 transition-transform md:w-[50px] md:h-[50px]"
-               priority
-             />
-             <span className="text-white font-black tracking-widest text-base md:text-lg hidden sm:block drop-shadow-md">
-               Juacos't
-             </span>
-          </div>
-          
-          {/* ENLACES - Con scroll horizontal invisible para pantallas pequeñas */}
-          <div className="flex gap-4 md:gap-8 text-white font-bold text-[11px] md:text-sm tracking-wider uppercase overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden items-center ml-4 pl-2">
-            <a href="#inicio" className="hover:text-brand-yellow transition-colors">Inicio</a>
-            <a href="/recetas" className="hover:text-brand-yellow transition-colors">Recetas</a>
-            <a href="#productos" className="hover:text-brand-yellow transition-colors">Productos</a>
-            <a href="#historia" className="hover:text-brand-yellow transition-colors">Historia</a>
-            <a href="#contacto" className="hover:text-brand-yellow transition-colors">Pedidos</a>
-          </div>
-        </div>
-      </motion.nav>
+    // reducedMotion="user": si el sistema pide menos movimiento, las entradas
+    // dejan de desplazarse y solo aparecen.
+    <MotionConfig reducedMotion="user">
+      <main className="site min-h-[100dvh] overflow-x-hidden bg-brand-red font-sans">
+        {/* NAVEGACIÓN FIJA */}
+        <motion.header
+          initial={{ y: -100 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.5, ease: EASE_OUT_EXPO }}
+          className="fixed inset-x-0 top-0 z-50 border-b border-brand-yellow/30 bg-brand-red/90 backdrop-blur-md"
+        >
+          <nav aria-label="Principal" className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-2 px-4 md:px-6">
+            <a href="#inicio" className="flex shrink-0 items-center gap-2 rounded-full md:gap-3">
+              <Image
+                src="/logo.svg"
+                alt=""
+                width={50}
+                height={50}
+                className="h-10 w-10 object-contain transition-transform hover:scale-105 motion-reduce:transition-none md:h-[50px] md:w-[50px]"
+                priority
+              />
+              <span className="hidden text-base font-black tracking-widest text-white sm:block md:text-lg">
+                Juacos&apos;t
+              </span>
+              <span className="sr-only sm:hidden">Juacos&apos;t, ir al inicio</span>
+            </a>
 
-      {/* SECCIÓN 1: HERO CON EFECTO LÁMPARA CENTRADO */}
-      <section id="inicio">
-        <LampContainer>
-          <motion.div
-            initial={{ opacity: 0.5, y: 100 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: 0.3,
-              duration: 0.8,
-              ease: "easeInOut",
-            }}
-            className="flex flex-col items-center text-center w-full relative z-50 pt-20 md:pt-0 px-4"
-          >
-            {/* Trust Badge */}
-            <div className="mb-6 md:mb-8">
-              <div className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] md:text-sm font-bold shadow-2xl transition-all hover:bg-white/20">
-                <Star size={14} className="text-brand-yellow drop-shadow-md md:w-4 md:h-4" fill="currentColor" />
-                <span className="text-white tracking-[0.15em] md:tracking-[0.25em] uppercase">100% Calidad y Tradición</span>
+            {/* Si aun así no caben (pantallas muy angostas), la lista se desliza */}
+            <ul className="flex items-center gap-0.5 overflow-x-auto whitespace-nowrap [scrollbar-width:none] md:gap-2 [&::-webkit-scrollbar]:hidden">
+              {NAV_LINKS.map((link) => (
+                <li key={link.href} className={"hideOnMobile" in link ? "hidden sm:block" : undefined}>
+                  {link.href.startsWith("/") ? (
+                    <Link href={link.href} className={navLinkClass}>
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a href={link.href} className={navLinkClass}>
+                      {link.label}
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </motion.header>
+
+        {/* SECCIÓN 1: HERO CON EFECTO LÁMPARA */}
+        <section id="inicio">
+          <LampContainer>
+            <motion.div
+              initial={{ opacity: 0.5, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.8, ease: EASE_OUT_EXPO }}
+              className="relative z-50 flex w-full flex-col items-center px-1 pt-20 text-center md:pt-0"
+            >
+              {/* Sello de confianza */}
+              <p className="mb-6 flex items-center gap-2 rounded-full border border-white/20 bg-brand-red-dark/70 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-white backdrop-blur-md md:mb-8 md:gap-3 md:px-6 md:py-2.5 md:text-sm md:tracking-[0.25em]">
+                <Star aria-hidden size={16} className="shrink-0 text-brand-yellow" fill="currentColor" />
+                100% Calidad y Tradición
+              </p>
+
+              {/* Una línea por idea. En teléfonos "& SIN HORMONAS" se parte en dos para
+                  conservar el tamaño; desde 640px caben las tres líneas. Tope: 6rem. */}
+              <h1 className="mb-6 text-[clamp(2.75rem,13vw,6rem)] sm:text-[clamp(3.5rem,10.6vw,6rem)] font-black leading-[0.95] tracking-[-0.04em] drop-shadow-[0_4px_6px_rgba(74,12,10,0.45)] md:mb-8">
+                <span className="block text-brand-yellow">FRESCO,</span>
+                <span className="block text-white">ORGÁNICO</span>
+                <span className="block text-brand-yellow">&amp; SIN HORMONAS</span>
+              </h1>
+
+              <p className="mx-auto mb-8 max-w-2xl text-pretty text-lg font-medium leading-relaxed text-white/90 md:mb-12 md:text-2xl">
+                Especialistas en pollo de alta calidad y huevo orgánico para familias y negocios desde hace más de 35 años.
+              </p>
+
+              <div className="group mt-2">
+                <AuroraButton href="#productos">
+                  VER PRODUCTOS
+                  <ArrowRight
+                    aria-hidden
+                    strokeWidth={3}
+                    className="transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none"
+                  />
+                </AuroraButton>
               </div>
-            </div>
+            </motion.div>
+          </LampContainer>
+        </section>
 
-            {/* Títulos con profundidad y tamaño adaptativo */}
-            <h1 className="text-[3.2rem] sm:text-[4rem] md:text-[6rem] lg:text-[7.5rem] font-black tracking-tighter leading-[0.85] mb-6 md:mb-8 max-w-[100vw] overflow-hidden px-2">
-              <span className="text-brand-yellow drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">FRESCO,</span> <br/>
-              <span className="text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">ORGÁNICO</span> <br/>
-              <span className="text-brand-yellow drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">& SIN HORMONAS</span>
-            </h1>
-            
-            {/* Subtítulo más limpio y legible */}
-            <p className="text-base md:text-2xl text-white/90 font-medium max-w-[90%] md:max-w-2xl mx-auto mb-8 md:mb-12 drop-shadow-md px-2 leading-relaxed">
-              Especialistas en pollo de alta calidad y huevo orgánico para familias y negocios desde hace más de 35 años.
-            </p>
-            
-            {/* Botón con micro-interacción en la flecha */}
-            <div className="mt-2 group">
-              <AuroraButton onClick={() => document.getElementById('productos')?.scrollIntoView({ behavior: 'smooth' })}>
-                <span className="flex items-center gap-2 text-sm md:text-base">
-                  VER PRODUCTOS <ArrowRight strokeWidth={3} className="transition-transform duration-300 group-hover:translate-x-1" />
-                </span>
-              </AuroraButton>
-            </div>
-          </motion.div>
-        </LampContainer>
-      </section>
-
-      {/* SECCIÓN 2: PRODUCTOS */}
-      <section id="productos" className="py-20 md:py-24 px-4 bg-brand-red-dark">
-        <div className="max-w-7xl mx-auto">
-          <motion.div 
-            initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}
-            variants={fadeInUp}
-            className="text-center mb-12 md:mb-16"
-          >
-            <h2 className="text-4xl md:text-7xl font-black text-brand-yellow mb-4">NUESTROS PRODUCTOS</h2>
-            <p className="text-white text-lg md:text-xl px-4">Calidad insuperable de nuestra granja a tu mesa. Ventas por mayoreo y menudeo.</p>
-          </motion.div>
-
-          <motion.div 
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 md:mb-16"
-          >
-            {/* Tarjeta Pollo */}
-            <motion.div variants={fadeInUp} className="bg-brand-yellow rounded-[2rem] p-6 md:p-12 text-brand-red shadow-2xl relative overflow-hidden group">
-              <div className="absolute -right-10 -top-10 text-brand-yellow-light opacity-30">
-                <Leaf size={150} className="md:w-[200px] md:h-[200px]" />
-              </div>
-              <h3 className="text-3xl md:text-4xl font-black mb-4 relative z-10">POLLO DESTAZADO</h3>
-              <p className="text-base md:text-lg font-bold mb-6 md:mb-8 relative z-10">Cortes perfectos, frescura garantizada del día. Ideal para restaurantes, rosticerías y el hogar.</p>
-              <ul className="space-y-3 md:space-y-4 font-bold relative z-10 text-sm md:text-base">
-                <li className="flex items-center gap-3"><Star className="w-5 h-5 md:w-6 md:h-6" /> Calidad Premium</li>
-                <li className="flex items-center gap-3"><Truck className="w-5 h-5 md:w-6 md:h-6" /> Entrega a Domicilio</li>
-                <li className="flex items-center gap-3"><Leaf className="w-5 h-5 md:w-6 md:h-6" /> Sin hormonas</li>
-              </ul>
+        {/* SECCIÓN 2: PRODUCTOS */}
+        <section id="productos" className="bg-brand-red-dark px-4 py-20 md:py-28">
+          <div className="mx-auto max-w-7xl">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={fadeInUp}
+              className="mb-12 text-center md:mb-16"
+            >
+              <h2 className="mb-4 text-balance text-4xl font-black leading-none tracking-tight text-brand-yellow md:text-7xl">
+                NUESTROS PRODUCTOS
+              </h2>
+              <p className="mx-auto max-w-2xl text-pretty px-4 text-lg text-white md:text-xl">
+                Calidad insuperable de nuestra granja a tu mesa. Ventas por mayoreo y menudeo.
+              </p>
             </motion.div>
 
-            {/* Tarjeta Huevo */}
-            <motion.div variants={fadeInUp} className="bg-white rounded-[2rem] p-6 md:p-12 text-brand-red shadow-2xl relative overflow-hidden group">
-              <div className="absolute -right-10 -bottom-10 text-brand-yellow opacity-20">
-                <Star size={150} className="md:w-[200px] md:h-[200px]" />
-              </div>
-              <h3 className="text-3xl md:text-4xl font-black mb-4 relative z-10 text-brand-red">HUEVO ORGÁNICO</h3>
-              <p className="text-base md:text-lg font-bold mb-6 md:mb-8 relative z-10">Gallinas de libre pastoreo, alimentadas con una dieta natural a base de pasto fresco, albahaca, orégano y leguminosas.</p>
-              <ul className="space-y-3 md:space-y-4 font-bold relative z-10 text-sm md:text-base">
-                <li className="flex items-center gap-3"><Star className="w-5 h-5 md:w-6 md:h-6" /> 100% Orgánico </li>
-                <li className="flex items-center gap-3"><Leaf className="w-5 h-5 md:w-6 md:h-6" /> Libre de pesticidas</li>
-                <li className="flex items-center gap-3"><EggFried className="w-5 h-5 md:w-6 md:h-6" /> Yema rica en nutrientes</li>
-              </ul>
-            </motion.div>
-          </motion.div>
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={staggerContainer}
+              className="mb-12 grid grid-cols-1 gap-6 md:mb-16 md:gap-8 lg:grid-cols-2"
+            >
+              {/* Tarjeta Pollo */}
+              <motion.article
+                variants={fadeInUp}
+                className="relative overflow-hidden rounded-[2rem] bg-brand-yellow p-6 text-brand-red-dark shadow-brand md:p-12"
+              >
+                <Leaf aria-hidden className="absolute -top-10 -right-10 h-[150px] w-[150px] text-brand-yellow-light opacity-30 md:h-[200px] md:w-[200px]" />
+                <h3 className="relative mb-4 text-3xl font-black md:text-4xl">POLLO DESTAZADO</h3>
+                <p className="relative mb-6 max-w-[48ch] text-pretty text-base font-semibold md:mb-8 md:text-lg">
+                  Cortes perfectos, frescura garantizada del día. Ideal para restaurantes, rosticerías y el hogar.
+                </p>
+                <ul className="relative space-y-3 text-sm font-bold md:space-y-4 md:text-base">
+                  <li className="flex items-center gap-3"><Star aria-hidden className="h-5 w-5 shrink-0 md:h-6 md:w-6" /> Calidad Premium</li>
+                  <li className="flex items-center gap-3"><Truck aria-hidden className="h-5 w-5 shrink-0 md:h-6 md:w-6" /> Entrega a Domicilio</li>
+                  <li className="flex items-center gap-3"><Leaf aria-hidden className="h-5 w-5 shrink-0 md:h-6 md:w-6" /> Sin hormonas</li>
+                </ul>
+              </motion.article>
 
-          {/* BOTÓN CENTRAL PARA ORDENAR */}
-          <motion.div 
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-            className="flex justify-center w-full px-4"
-          >
-             <AuroraButton 
-                onClick={() => window.open('https://wa.me/2283576092?text=Buen%20d%C3%ADa%2C%20quisiera%20hacer%20un%20pedido', '_blank')}
-                className="w-full md:w-auto !px-8 md:!px-16 !py-4 md:!py-6 text-lg md:!text-2xl" 
-                glowClassName="!blur-2xl"
+              {/* Tarjeta Huevo */}
+              <motion.article
+                variants={fadeInUp}
+                className="relative overflow-hidden rounded-[2rem] bg-white p-6 text-brand-red shadow-brand md:p-12"
+              >
+                <Star aria-hidden className="absolute -right-10 -bottom-10 h-[150px] w-[150px] text-brand-yellow opacity-20 md:h-[200px] md:w-[200px]" />
+                <h3 className="relative mb-4 text-3xl font-black md:text-4xl">HUEVO ORGÁNICO</h3>
+                <p className="relative mb-6 max-w-[48ch] text-pretty text-base font-semibold md:mb-8 md:text-lg">
+                  Gallinas de libre pastoreo, alimentadas con una dieta natural a base de pasto fresco, albahaca, orégano y leguminosas.
+                </p>
+                <ul className="relative space-y-3 text-sm font-bold md:space-y-4 md:text-base">
+                  <li className="flex items-center gap-3"><Star aria-hidden className="h-5 w-5 shrink-0 md:h-6 md:w-6" /> 100% Orgánico</li>
+                  <li className="flex items-center gap-3"><Leaf aria-hidden className="h-5 w-5 shrink-0 md:h-6 md:w-6" /> Libre de pesticidas</li>
+                  <li className="flex items-center gap-3"><EggFried aria-hidden className="h-5 w-5 shrink-0 md:h-6 md:w-6" /> Yema rica en nutrientes</li>
+                </ul>
+              </motion.article>
+            </motion.div>
+
+            {/* BOTÓN CENTRAL PARA ORDENAR */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeInUp}
+              className="flex w-full justify-center px-4"
+            >
+              <AuroraButton
+                href={whatsappUrl("Buen día, quisiera hacer un pedido")}
+                target="_blank"
+                rel="noopener noreferrer"
+                size="lg"
+                glowClassName="blur-2xl"
               >
                 ORDENAR AHORA
-             </AuroraButton>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* SECCIÓN 3: HISTORIA / VALORES */}
-      <section id="historia" className="py-20 md:py-24 px-4 relative">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.h2 
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-            className="text-4xl md:text-6xl font-black text-white mb-6 md:mb-8"
-          >
-            NUESTRA <span className="text-brand-yellow">HISTORIA</span>
-          </motion.h2>
-          <motion.div 
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-            className="bg-brand-yellow text-brand-red p-6 md:p-12 rounded-[2rem] font-bold text-base md:text-2xl leading-relaxed shadow-[6px_6px_0_0_rgba(255,255,255,1)] md:shadow-[10px_10px_0_0_rgba(255,255,255,1)]"
-          >
-            Desde hace más de 35 años, en Pollos Juacos't hemos mantenido una promesa inquebrantable: llevar el mejor sabor y la nutrición más pura a las familias. Creemos en el trabajo honesto, en el bienestar animal y en que la calidad de los ingredientes define el amor en cada comida.<br/> <br/>
-          Somos tradición, somos frescura. 
-          </motion.div>
-        </div>
-      </section>
-
-      {/* SECCIÓN 4: CONTACTO Y FOOTER */}
-      <section id="contacto" className="bg-brand-yellow pt-20 md:pt-24 pb-8 md:pb-12 px-4 rounded-t-[3rem] text-brand-red">
-        <div className="max-w-7xl mx-auto">
-          <motion.div 
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-12 mb-12 md:mb-16"
-          >
-            <div>
-              <h2 className="text-4xl md:text-5xl font-black mb-4 md:mb-6 leading-tight">HAZ TU PEDIDO <br className="hidden md:block"/> HOY MISMO.</h2>
-              <p className="text-lg md:text-xl font-bold mb-6 md:mb-8">Atendemos pedidos de mayoreo para tu negocio y menudeo para tu hogar.</p>
-              <div className="space-y-4 md:space-y-6 text-base md:text-lg font-bold">
-                <div className="flex items-center gap-3 md:gap-4 bg-brand-red text-white p-4 rounded-xl">
-                  <Phone className="text-brand-yellow shrink-0" /> <span>2282 10 53 30 </span>
-                  <CircleSmall className="text-brand-yellow shrink-0" /> <span> 2283 57 60 92</span>
-                </div>
-                 <div className="flex items-center gap-3 md:gap-4 bg-brand-red text-white p-4 rounded-xl">
-                  <Mail className="text-brand-yellow shrink-0" /> <span>pollosjuacost@gmail.com </span>
-                </div>
-                <div className="flex items-center gap-3 md:gap-4 bg-brand-red text-white p-4 rounded-xl">
-                  <MapPin className="text-brand-yellow shrink-0" /> <span>Hidalgo #73, Banderilla Centro</span>
-                </div>
-                <div className="flex items-center gap-3 md:gap-4 bg-brand-red text-white p-4 rounded-xl">
-                  <Clock className="text-brand-yellow shrink-0" /> <span className="text-sm md:text-base">Lunes a Domingo: 7:00 AM - 3:00 PM</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Formulario Dinámico conectado a WhatsApp */}
-            <div className="bg-white p-6 md:p-8 rounded-[2rem] shadow-xl">
-              <h3 className="text-xl md:text-2xl font-black mb-6 uppercase text-brand-red">COTIZA POR MAYOREO</h3>
-              
-              <form onSubmit={enviarWhatsApp} className="space-y-4 flex flex-col">
-                <input 
-                  type="text" 
-                  required
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                  placeholder="Tu Nombre" 
-                  className="bg-brand-yellow/20 text-brand-red font-bold placeholder:text-brand-red/60 p-4 rounded-xl outline-none focus:ring-4 focus:ring-brand-red/20 transition-all text-sm md:text-base" 
-                />
-                
-                <input 
-                  type="text" 
-                  required
-                  value={telefono}
-                  onChange={(e) => setTelefono(e.target.value)}
-                  placeholder="Teléfono" 
-                  className="bg-brand-yellow/20 text-brand-red font-bold placeholder:text-brand-red/60 p-4 rounded-xl outline-none focus:ring-4 focus:ring-brand-red/20 transition-all text-sm md:text-base" 
-                />
-                <input 
-                  type="text" 
-                  required
-                  value={direccion}
-                  onChange={(e) => setDireccion(e.target.value)}
-                  placeholder="Dirección de entrega" 
-                  className="bg-brand-yellow/20 text-brand-red font-bold placeholder:text-brand-red/60 p-4 rounded-xl outline-none focus:ring-4 focus:ring-brand-red/20 transition-all text-sm md:text-base" 
-                />
-                <textarea 
-                  rows={4} 
-                  required
-                  value={pedido}
-                  onChange={(e) => setPedido(e.target.value)}
-                  placeholder="¿Qué necesitas? (Ej. 100 pechugas en bisteces de 4 aplanados)" 
-                  className="bg-brand-yellow/20 text-brand-red font-bold placeholder:text-brand-red/60 p-4 rounded-xl outline-none focus:ring-4 focus:ring-brand-red/20 transition-all resize-none text-sm md:text-base"
-                ></textarea>
-                
-                <motion.button 
-                  type="submit"
-                  whileHover={{ scale: 1.02 }} 
-                  whileTap={{ scale: 0.98 }}
-                  className="bg-brand-red text-brand-yellow font-black py-4 rounded-xl text-base md:text-lg uppercase tracking-widest mt-2 hover:bg-brand-red-dark transition-colors block text-center w-full shadow-md"
-                >
-                  Enviar Mensaje
-                </motion.button>
-              </form>
-            </div>
-          </motion.div>
-
-          <div className="border-t-[3px] border-brand-red/20 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center font-bold text-xs md:text-sm text-center md:text-left gap-4 md:gap-0">
-            <p>© 2026 Pollos Juacos't. Todos los derechos reservados.</p>
-            <div className="flex gap-4">
-              <a href="#" className="hover:underline">Privacidad</a>
-              <a href="#" className="hover:underline">Términos</a>
-            </div>
+                <span className="sr-only"> por WhatsApp (se abre en otra pestaña)</span>
+              </AuroraButton>
+            </motion.div>
           </div>
-        </div>
-      </section>
+        </section>
 
-    </main>
+        {/* SECCIÓN 3: HISTORIA / VALORES */}
+        <section id="historia" className="relative px-4 py-20 md:py-28">
+          <div className="mx-auto max-w-4xl text-center">
+            <motion.h2
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeInUp}
+              className="mb-6 text-balance text-4xl font-black leading-none tracking-tight text-white md:mb-10 md:text-6xl"
+            >
+              NUESTRA <span className="text-brand-yellow">HISTORIA</span>
+            </motion.h2>
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeInUp}
+              className="space-y-6 rounded-[2rem] bg-brand-yellow p-6 text-pretty text-lg font-semibold leading-relaxed text-brand-red-dark shadow-[6px_6px_0_0_#fff] md:p-12 md:text-2xl md:shadow-[10px_10px_0_0_#fff]"
+            >
+              <p>
+                Desde hace más de 35 años, en Pollos Juacos&apos;t hemos mantenido una promesa inquebrantable: llevar el mejor sabor y la nutrición más pura a las familias. Creemos en el trabajo honesto, en el bienestar animal y en que la calidad de los ingredientes define el amor en cada comida.
+              </p>
+              <p className="font-black">Somos tradición, somos frescura.</p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* SECCIÓN 4: CONTACTO Y PIE. Sobre amarillo el foco va en rojo oscuro. */}
+        <section
+          id="contacto"
+          className="rounded-t-[3rem] bg-brand-yellow px-4 pt-20 pb-8 text-brand-red-dark [--focus-ring:var(--color-brand-red-dark)] md:pt-24 md:pb-12"
+        >
+          <div className="mx-auto max-w-7xl">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeInUp}
+              className="mb-12 grid grid-cols-1 gap-10 md:mb-16 md:gap-12 lg:grid-cols-2"
+            >
+              <div>
+                <h2 className="mb-4 text-4xl font-black leading-tight tracking-tight md:mb-6 md:text-5xl">
+                  HAZ TU PEDIDO <br className="hidden md:block" /> HOY MISMO.
+                </h2>
+                <p className="mb-6 max-w-[40ch] text-pretty text-lg font-bold md:mb-8 md:text-xl">
+                  Atendemos pedidos de mayoreo para tu negocio y menudeo para tu hogar.
+                </p>
+                <ul className="space-y-4 text-base font-bold [--focus-ring:#fff] md:space-y-5 md:text-lg">
+                  <li className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl bg-brand-red p-4 text-white">
+                    <Phone aria-hidden className="shrink-0 text-brand-yellow" />
+                    {SITE.phones.map((phone) => (
+                      <a key={phone.tel} href={`tel:${phone.tel}`} className={`${contactLinkClass} tabular-nums`}>
+                        <span className="sr-only">Llamar al </span>
+                        {phone.label}
+                      </a>
+                    ))}
+                  </li>
+                  <li className="flex items-center gap-3 rounded-xl bg-brand-red p-4 text-white md:gap-4">
+                    <Mail aria-hidden className="shrink-0 text-brand-yellow" />
+                    <a href={`mailto:${SITE.email}`} className={`${contactLinkClass} break-all`}>
+                      {SITE.email}
+                    </a>
+                  </li>
+                  <li className="flex items-center gap-3 rounded-xl bg-brand-red p-4 text-white md:gap-4">
+                    <MapPin aria-hidden className="shrink-0 text-brand-yellow" />
+                    <a href={SITE.mapsUrl} target="_blank" rel="noopener noreferrer" className={contactLinkClass}>
+                      {SITE.address}
+                      <span className="sr-only"> (abrir en Google Maps, otra pestaña)</span>
+                    </a>
+                  </li>
+                  <li className="flex items-center gap-3 rounded-xl bg-brand-red p-4 text-white md:gap-4">
+                    <Clock aria-hidden className="shrink-0 text-brand-yellow" />
+                    <span className="text-sm md:text-base">{SITE.hours}</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Formulario conectado a WhatsApp. Sobre blanco el foco va en rojo. */}
+              <div className="rounded-[2rem] bg-white p-6 shadow-brand [--focus-ring:var(--color-brand-red)] md:p-8">
+                <h3 className="mb-6 text-xl font-black uppercase text-brand-red md:text-2xl">COTIZA POR MAYOREO</h3>
+
+                <form onSubmit={enviarWhatsApp} className="flex flex-col gap-4">
+                  <div>
+                    <label htmlFor="cotiza-nombre" className={labelClass}>Tu nombre</label>
+                    <input
+                      id="cotiza-nombre"
+                      name="nombre"
+                      type="text"
+                      autoComplete="name"
+                      required
+                      value={nombre}
+                      onChange={(e) => setNombre(e.target.value)}
+                      className={fieldClass}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="cotiza-telefono" className={labelClass}>Teléfono</label>
+                    <input
+                      id="cotiza-telefono"
+                      name="telefono"
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      required
+                      value={telefono}
+                      onChange={(e) => setTelefono(e.target.value)}
+                      className={fieldClass}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="cotiza-direccion" className={labelClass}>Dirección de entrega</label>
+                    <input
+                      id="cotiza-direccion"
+                      name="direccion"
+                      type="text"
+                      autoComplete="street-address"
+                      required
+                      value={direccion}
+                      onChange={(e) => setDireccion(e.target.value)}
+                      className={fieldClass}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="cotiza-pedido" className={labelClass}>¿Qué necesitas?</label>
+                    <textarea
+                      id="cotiza-pedido"
+                      name="pedido"
+                      rows={4}
+                      required
+                      value={pedido}
+                      onChange={(e) => setPedido(e.target.value)}
+                      placeholder="Ej. 100 pechugas en bisteces de 4 aplanados"
+                      className={`${fieldClass} resize-none`}
+                    />
+                  </div>
+
+                  <motion.button
+                    type="submit"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="mt-2 block w-full cursor-pointer rounded-xl bg-brand-red-dark py-4 text-center text-base font-black uppercase tracking-widest text-brand-yellow shadow-md md:text-lg"
+                  >
+                    Enviar Mensaje
+                  </motion.button>
+                  <p className="text-center text-sm font-medium text-brand-red-dark">
+                    Se abrirá WhatsApp con tu pedido listo para enviar.
+                  </p>
+                </form>
+              </div>
+            </motion.div>
+
+            <footer className="flex flex-col items-center gap-2 border-t-2 border-brand-red/20 pt-6 text-center text-xs font-bold md:flex-row md:justify-between md:pt-8 md:text-left md:text-sm">
+              <p>© {new Date().getFullYear()} Pollos Juacos&apos;t. Todos los derechos reservados.</p>
+              {/* Acceso discreto al panel privado (pide correo y contraseña) */}
+              <Link href="/admin" prefetch={false} className="rounded px-1 py-1 font-semibold underline decoration-brand-red/40 underline-offset-4 hover:decoration-brand-red-dark">
+                Acceso administrador
+              </Link>
+            </footer>
+          </div>
+        </section>
+      </main>
+    </MotionConfig>
   );
 }

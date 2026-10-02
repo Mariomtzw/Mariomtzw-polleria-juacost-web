@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Herramientas y archivos que no son código de la app:
+    ".claude/**",
+    "_to_delete/**",
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 

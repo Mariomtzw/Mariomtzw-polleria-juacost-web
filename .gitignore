@@ -39,3 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# entorno local
+.env
+.env*.local
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
+
+# la plantilla de variables sí se versiona (no contiene claves reales)
+!.env.example
+
+# archivos temporales del sistema y respaldos locales
+.fuse_hidden*
+_to_delete/
+test-results/
+playwright-report/
