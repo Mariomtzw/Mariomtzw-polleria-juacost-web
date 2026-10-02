@@ -51,7 +51,7 @@ export function BranchRankingChart({ data }: { data: BranchRank[] }) {
               borderRadius: 12,
               color: CHART.ink.primary,
             }}
-            formatter={(v: number) => [currency(v), "Vendido Real"]}
+            formatter={(v) => [currency(Number(v)), "Vendido Real"]}
           />
           <Bar dataKey="vendidoReal" fill={CHART.single} radius={[0, 4, 4, 0]} />
         </BarChart>
@@ -62,7 +62,7 @@ export function BranchRankingChart({ data }: { data: BranchRank[] }) {
 
 function Empty() {
   return (
-    <div className="flex h-56 items-center justify-center rounded-xl border border-white/10 text-sm text-neutral-500">
+    <div className="flex h-56 items-center justify-center rounded-xl border border-white/10 text-sm text-neutral-400">
       Sin datos de sucursales
     </div>
   );

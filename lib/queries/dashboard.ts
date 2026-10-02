@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
+import { businessToday, todayISO } from "@/lib/dates";
 
 function startNDaysAgo(n: number): Date {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
+  const d = businessToday(); // "hoy" es el día del negocio, no el del servidor (UTC)
   d.setDate(d.getDate() - n);
   return d;
 }
@@ -71,4 +71,29 @@ export async function getHeatmap(days = 14): Promise<Heatmap> {
     if (matrix[bi][di] > max) max = matrix[bi][di];
   }
   return { branches: branches.map((b) => b.name), dates, matrix, max };
+}
+
+export interface TodayStatus {
+  date: string; // "YYYY-MM-DD" (día del negocio)
+  captured: number; // puestos activos con venta capturada hoy
+  total: number; // puestos activos
+  vendidoReal: number;
+}
+
+/** Avance de la captura de hoy, para el aviso del inicio del panel. */
+export async function getTodayStatus(): Promise<TodayStatus> {
+  const date = todayISO();
+  const [total, sales] = await Promise.all([
+    prisma.branch.count({ where: { isActive: true } }),
+    prisma.dailySale.findMany({
+      where: { date: new Date(`${date}T00:00:00`), branch: { isActive: true } },
+      select: { vendidoReal: true },
+    }),
+  ]);
+  return {
+    date,
+    captured: sales.length,
+    total,
+    vendidoReal: sales.reduce((a, s) => a + s.vendidoReal.toNumber(), 0),
+  };
 }

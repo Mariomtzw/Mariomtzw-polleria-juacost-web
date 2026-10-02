@@ -47,7 +47,7 @@ export function SalesTrendChart({ data }: { data: TrendPoint[] }) {
               color: CHART.ink.primary,
             }}
             labelStyle={{ color: CHART.ink.secondary }}
-            formatter={(v: number, name: string) => [currency(v), name]}
+            formatter={(v, name) => [currency(Number(v)), name]}
           />
           <Legend wrapperStyle={{ color: CHART.ink.secondary, fontSize: 13 }} />
           <Line
@@ -76,7 +76,7 @@ export function SalesTrendChart({ data }: { data: TrendPoint[] }) {
 
 function EmptyState({ label }: { label: string }) {
   return (
-    <div className="flex h-72 items-center justify-center rounded-xl border border-white/10 text-sm text-neutral-500">
+    <div className="flex h-72 items-center justify-center rounded-xl border border-white/10 text-sm text-neutral-400">
       {label}
     </div>
   );

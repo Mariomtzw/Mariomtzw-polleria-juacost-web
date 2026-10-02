@@ -11,30 +11,27 @@ export interface Column<T> {
 export function DataTable<T>({
   columns,
   rows,
+  caption,
   empty = "Sin registros",
 }: {
   columns: Column<T>[];
   rows: T[];
+  /** Describe la tabla para lectores de pantalla (no se ve). */
+  caption?: string;
   empty?: string;
 }) {
   if (rows.length === 0) {
-    return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-sm text-neutral-500">
-        {empty}
-      </div>
-    );
+    return <div className="material rounded-3xl p-8 text-center text-sm text-neutral-400">{empty}</div>;
   }
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
-      <table className="w-full text-sm">
+    <div className="material overflow-x-auto rounded-3xl">
+      <table className="table">
+        {caption ? <caption className="sr-only">{caption}</caption> : null}
         <thead>
-          <tr className="border-b border-white/10 text-left text-neutral-400">
+          <tr>
             {columns.map((c, i) => (
-              <th
-                key={i}
-                className={`px-4 py-3 font-medium ${c.align === "right" ? "text-right" : ""}`}
-              >
+              <th key={i} scope="col" className={c.align === "right" ? "num" : ""}>
                 {c.header}
               </th>
             ))}
@@ -42,12 +39,9 @@ export function DataTable<T>({
         </thead>
         <tbody>
           {rows.map((row, ri) => (
-            <tr key={ri} className="border-b border-white/5 last:border-0 hover:bg-white/5">
+            <tr key={ri}>
               {columns.map((c, ci) => (
-                <td
-                  key={ci}
-                  className={`px-4 py-3 tabular-nums text-neutral-200 ${c.align === "right" ? "text-right" : ""}`}
-                >
+                <td key={ci} className={`text-neutral-200 ${c.align === "right" ? "num" : ""}`}>
                   {c.cell(row)}
                 </td>
               ))}

@@ -55,10 +55,10 @@ export function SellerRankingChart({ data }: { data: SellerRank[] }) {
                 borderRadius: 12,
                 color: CHART.ink.primary,
               }}
-              formatter={(v: number, _n, item) => {
+              formatter={(v, _n, item) => {
                 const p = item?.payload as SellerRank | undefined;
                 return [
-                  `${v.toFixed(1)} pollos · dif ${p ? p.diferencia.toFixed(1) : "-"} · ${
+                  `${Number(v).toFixed(1)} pollos · dif ${p ? p.diferencia.toFixed(1) : "-"} · ${
                     p ? TIER_LABEL[p.tier] : ""
                   }`,
                   "Vendido (equiv.)",
@@ -100,7 +100,7 @@ function TierLegend() {
 
 function Empty() {
   return (
-    <div className="flex h-56 items-center justify-center rounded-xl border border-white/10 text-sm text-neutral-500">
+    <div className="flex h-56 items-center justify-center rounded-xl border border-white/10 text-sm text-neutral-400">
       Sin datos de vendedoras
     </div>
   );

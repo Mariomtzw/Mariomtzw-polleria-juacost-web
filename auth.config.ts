@@ -47,7 +47,8 @@ export const authConfig = {
 
     // Expone el rol en la sesión del lado servidor/cliente.
     session({ session, token }) {
-      if (session.user) {
+      // El token llega sin tipo: solo se copia si es uno de los roles válidos.
+      if (session.user && (token.role === "OWNER" || token.role === "STAFF")) {
         session.user.role = token.role;
       }
       return session;

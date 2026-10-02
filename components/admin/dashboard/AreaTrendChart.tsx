@@ -8,7 +8,7 @@ import type { TrendPoint } from "@/lib/queries/analytics";
 
 export function AreaTrendChart({ data }: { data: TrendPoint[] }) {
   if (data.length === 0) {
-    return <div className="flex h-72 items-center justify-center text-sm text-neutral-500">Sin ventas en el periodo</div>;
+    return <div className="flex h-72 items-center justify-center text-sm text-neutral-400">Sin ventas en el periodo</div>;
   }
   return (
     <div className="h-72 w-full">
@@ -26,7 +26,7 @@ export function AreaTrendChart({ data }: { data: TrendPoint[] }) {
           <Tooltip
             contentStyle={{ background: CHART.surface, border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, color: CHART.ink.primary }}
             labelStyle={{ color: CHART.ink.secondary }}
-            formatter={(v: number, name: string) => [currency(v), name]}
+            formatter={(v, name) => [currency(Number(v)), name]}
           />
           <Legend wrapperStyle={{ color: CHART.ink.secondary, fontSize: 13 }} />
           <Area type="monotone" dataKey="vendidoReal" name="Vendido Real" stroke={CHART.series2} strokeWidth={2} fill="url(#gradReal)" activeDot={{ r: 4 }} />

@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { formatDateShort } from "@/lib/dates";
 import { OrderForm } from "@/components/admin/forms/OrderForm";
 import { DataTable, type Column } from "@/components/admin/DataTable";
+import { PageHeader, SectionTitle } from "@/components/admin/ui/PageHeader";
 import { currency } from "@/components/admin/charts/chart-theme";
+
+export const metadata: Metadata = { title: "Pedidos" };
 
 interface OrderRow {
   id: string;
@@ -16,7 +21,7 @@ export default async function PedidosPage() {
   const [branches, orders] = await Promise.all([
     prisma.branch.findMany({ where: { isActive: true }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
     prisma.order.findMany({
-      orderBy: { date: "desc" },
+      orderBy: [{ date: "desc" }, { createdAt: "desc" }],
       take: 60,
       select: {
         id: true,
@@ -39,21 +44,21 @@ export default async function PedidosPage() {
   }));
 
   const columns: Column<OrderRow>[] = [
-    { header: "Fecha", cell: (r) => r.date },
+    { header: "Fecha", cell: (r) => <span className="whitespace-nowrap">{formatDateShort(r.date)}</span> },
     { header: "Puesto", cell: (r) => r.branch },
     { header: "Monto", cell: (r) => currency(r.amount), align: "right" },
     { header: "Pollos", cell: (r) => (r.quantity ?? "—"), align: "right" },
-    { header: "Notas", cell: (r) => r.notes ?? "—" },
+    { header: "Notas", cell: (r) => r.notes || "—" },
   ];
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold text-white">Pedidos</h1>
+      <PageHeader title="Pedidos" description="Pedidos especiales por puesto (fiestas, negocios, encargos)." />
       <OrderForm branches={branches} />
-      <div>
-        <h2 className="mb-3 text-sm font-medium text-neutral-300">Últimos registros</h2>
-        <DataTable columns={columns} rows={rows} empty="Aún no hay pedidos registrados" />
-      </div>
+      <section aria-labelledby="pedidos-ultimos">
+        <SectionTitle id="pedidos-ultimos">Últimos registros</SectionTitle>
+        <DataTable columns={columns} rows={rows} caption="Últimos pedidos registrados" empty="Aún no hay pedidos registrados" />
+      </section>
     </div>
   );
 }

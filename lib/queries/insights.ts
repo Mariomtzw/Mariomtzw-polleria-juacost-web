@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { businessToday } from "@/lib/dates";
 import { analyzeAllBranches } from "@/lib/datascience/patterns";
 import { MODEL_VERSION } from "@/lib/datascience/forecast";
 import type { Insight, FactorKey } from "@/lib/datascience/types";
@@ -19,8 +20,7 @@ export interface UpcomingForecast {
 
 /** Pronósticos futuros ya persistidos. */
 export async function getUpcomingForecasts(limit = 40): Promise<UpcomingForecast[]> {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = businessToday();
 
   const rows = await prisma.salesForecast.findMany({
     where: { modelVersion: MODEL_VERSION, date: { gte: today } },

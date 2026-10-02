@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { assertOwner } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
+import { businessToday } from "@/lib/dates";
 
 type R<T = undefined> = { ok: true; data?: T } | { ok: false; error: string };
 const money = z.coerce.number().nonnegative();
@@ -17,7 +18,7 @@ export async function setColdPrices(input: unknown): Promise<R> {
   await assertOwner();
   const p = pricesSchema.safeParse(input);
   if (!p.success) return { ok: false, error: p.error.issues[0]?.message ?? "Datos inválidos" };
-  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const today = businessToday(); // fecha de vigencia = día del negocio
   await prisma.$transaction(async (tx) => {
     for (const row of p.data.prices) {
       await tx.coldPiecePrice.updateMany({

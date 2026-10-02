@@ -1,4 +1,5 @@
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { currency } from "@/components/admin/charts/chart-theme";
 import type { Insight } from "@/lib/datascience/types";
 
 const CONF_LABEL = { high: "Confianza alta", med: "Confianza media", low: "Confianza baja" } as const;
@@ -14,42 +15,42 @@ export function InsightCard({ insight }: { insight: Insight }) {
   const up = insight.direction === "up";
   const flat = insight.direction === "flat";
   const Icon = flat ? Minus : up ? TrendingUp : TrendingDown;
-  const tone = flat ? "text-neutral-400" : up ? "text-emerald-400" : "text-red-400";
+  const tone = flat ? "text-neutral-300" : up ? "text-emerald-400" : "text-red-400";
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
-      <div className="mb-2 flex items-center justify-between">
-        <span className={`flex items-center gap-1.5 text-sm font-semibold ${tone}`}>
-          <Icon size={16} />
+    <li className="material rounded-2xl p-4">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <span className={`flex items-center gap-1.5 text-sm font-semibold tabular-nums ${tone}`}>
+          <Icon aria-hidden size={16} />
           {insight.pctChange > 0 ? "+" : ""}
           {insight.pctChange}%
         </span>
-        <span className={`rounded-full px-2 py-0.5 text-[11px] ${CONF_CLASS[insight.confidence]}`}>
+        <span className={`rounded-full px-2 py-0.5 text-xs ${CONF_CLASS[insight.confidence]}`}>
           {CONF_LABEL[insight.confidence]}
         </span>
       </div>
-      <p className="text-sm text-neutral-200">{insight.text}</p>
-      <p className="mt-2 text-[11px] text-neutral-500">
-        Base ${insight.baseMean.toLocaleString("es-MX")} → ${insight.groupMean.toLocaleString("es-MX")}
+      <p className="text-pretty text-sm text-neutral-200">{insight.text}</p>
+      <p className="mt-2 text-xs tabular-nums text-neutral-400">
+        Promedio normal {currency(insight.baseMean)} → {currency(insight.groupMean)}
       </p>
-    </div>
+    </li>
   );
 }
 
 export function InsightsPanel({ insights }: { insights: Insight[] }) {
   if (insights.length === 0) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-sm text-neutral-500">
+      <div className="material rounded-3xl p-8 text-center text-sm text-neutral-400">
         Aún no hay patrones detectados. Carga clima histórico y registra fiestas para
         que el motor encuentre correlaciones.
       </div>
     );
   }
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+    <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
       {insights.map((i) => (
         <InsightCard key={i.id} insight={i} />
       ))}
-    </div>
+    </ul>
   );
 }

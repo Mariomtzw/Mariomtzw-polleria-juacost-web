@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { assertOwner } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
+import { businessToday } from "@/lib/dates";
 import { precioPorPieza } from "@/lib/pricing";
 
 const money = z.coerce.number().nonnegative();
@@ -21,7 +22,7 @@ export async function setFreshPrices(input: unknown): Promise<R<{ precioPorPieza
   const p = schema.safeParse(input);
   if (!p.success) return { ok: false, error: p.error.issues[0]?.message ?? "Datos inválidos" };
   const { branchId, ...prices } = p.data;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const today = businessToday(); // fecha de vigencia = día del negocio
   const ppp = precioPorPieza(prices);
   await prisma.$transaction(async (tx) => {
     await tx.priceList.updateMany({ where: { branchId, isActive: true }, data: { isActive: false } });

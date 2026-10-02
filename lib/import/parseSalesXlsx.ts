@@ -73,7 +73,8 @@ export async function parseSalesXlsx(source: string | Buffer): Promise<ParsedShe
   if (typeof source === "string") {
     await wb.xlsx.readFile(source);
   } else {
-    await wb.xlsx.load(source);
+    // exceljs declara su propio tipo Buffer (anterior al de Node 22): mismo objeto, distinto tipo.
+    await wb.xlsx.load(source as unknown as Parameters<typeof wb.xlsx.load>[0]);
   }
 
   const ws = wb.worksheets[0];

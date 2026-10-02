@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { formatDateShort } from "@/lib/dates";
 import { LeftoverForm } from "@/components/admin/forms/LeftoverForm";
 import { DataTable, type Column } from "@/components/admin/DataTable";
+import { PageHeader, SectionTitle } from "@/components/admin/ui/PageHeader";
 import { currency } from "@/components/admin/charts/chart-theme";
+
+export const metadata: Metadata = { title: "Sobrantes" };
 
 interface LeftoverRow {
   id: string;
@@ -17,7 +22,7 @@ export default async function SobrantesPage() {
     prisma.branch.findMany({ where: { isActive: true }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
     prisma.pieceType.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true, label: true } }),
     prisma.leftover.findMany({
-      orderBy: { date: "desc" },
+      orderBy: [{ date: "desc" }, { createdAt: "desc" }],
       take: 60,
       select: {
         id: true,
@@ -40,7 +45,7 @@ export default async function SobrantesPage() {
   }));
 
   const columns: Column<LeftoverRow>[] = [
-    { header: "Fecha", cell: (r) => r.date },
+    { header: "Fecha", cell: (r) => <span className="whitespace-nowrap">{formatDateShort(r.date)}</span> },
     { header: "Puesto", cell: (r) => r.branch },
     { header: "Pieza", cell: (r) => r.piece },
     { header: "Cantidad", cell: (r) => r.quantity, align: "right" },
@@ -49,15 +54,15 @@ export default async function SobrantesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold text-white">Sobrantes</h1>
+      <PageHeader title="Sobrantes" description="Historial de sobrantes por puesto y pieza. El día a día se captura en Sobras y Frío." />
       <LeftoverForm
         branches={branches}
         pieceTypes={pieceTypes.map((p) => ({ id: p.id, name: p.label }))}
       />
-      <div>
-        <h2 className="mb-3 text-sm font-medium text-neutral-300">Últimos registros</h2>
-        <DataTable columns={columns} rows={rows} empty="Aún no hay sobrantes registrados" />
-      </div>
+      <section aria-labelledby="sobrantes-ultimos">
+        <SectionTitle id="sobrantes-ultimos">Últimos registros</SectionTitle>
+        <DataTable columns={columns} rows={rows} caption="Últimos sobrantes registrados" empty="Aún no hay sobrantes registrados" />
+      </section>
     </div>
   );
 }

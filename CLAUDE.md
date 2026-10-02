@@ -15,7 +15,7 @@ captura diaria de 9 puestos, precios de despiece, pollo frío, pedidos, corte y 
 ## Comandos
 
 - Desarrollo: `npm run dev` (http://localhost:3000)
-- Tipos: `npx tsc --noEmit` — **ejecútalo siempre a mano**: `next.config.ts` ignora errores de tipos y de lint en el build
+- Tipos: `npx tsc --noEmit` — **ejecútalo siempre a mano**: `next.config.ts` ignora errores de tipos en el build. Hoy pasa en 0 errores; mantenlo así
 - Lint: `npm run lint`
 - Unitarias: `npm test`
 - E2E: `npm run test:e2e` (requiere `npm run dev` corriendo, o `E2E_BASE_URL`)
@@ -26,6 +26,7 @@ captura diaria de 9 puestos, precios de despiece, pollo frío, pedidos, corte y 
 - `app/page.tsx`, `app/recetas/` — sitio público (client components)
 - `app/(admin)/admin/login/` — login del dueño
 - `app/(admin)/admin/(dashboard)/` — panel: `captura`, `precios`, `ventas`, `frio`, `pedidos`, `corte`, `analitica`, `sobrantes`
+- `app/(admin)/admin/layout.tsx` — título y `noindex` de todo el panel. `app/robots.ts` — bloquea `/admin` y `/api`
 - `app/api/` — `auth`, `blob/upload`, `export/xlsx`, `cron/refresh-forecasts`
 - `components/ui/` — piezas del sitio público (lamp, aurora-button, scroll-expansion-hero, whatsapp-float)
 - `lib/site.ts` — datos de contacto del sitio público. `app/recetas/recetas-data.ts` — las recetas
@@ -33,6 +34,7 @@ captura diaria de 9 puestos, precios de despiece, pollo frío, pedidos, corte y 
 - `lib/actions/` — Server Actions (mutaciones). `lib/queries/` — lecturas para páginas
 - `lib/pricing.ts`, `lib/calculations.ts` — fórmulas de negocio. `lib/datascience/` — pronóstico y patrones
 - `lib/validation.ts` — esquemas zod. `lib/auth-guards.ts` — `requireOwner` / `assertOwner`
+- `lib/dates.ts` — el "día del negocio" (hora de México): `todayISO`, `shiftISO`, `resolveDateParam`, `businessToday`, `formatDateShort`, `formatDateLong`
 - `prisma/schema.prisma`, `prisma/seed.ts` — modelo y datos iniciales (9 puestos, 8 piezas, usuario OWNER)
 - `auth.config.ts` (edge-safe), `auth.ts` (Node), `proxy.ts` (protege `/admin/*`)
 
@@ -41,6 +43,7 @@ captura diaria de 9 puestos, precios de despiece, pollo frío, pedidos, corte y 
 - Alias de imports: `@/` apunta a la raíz del repo
 - Todo el texto visible va en español (es-MX). Dinero con `currency()` de `components/admin/charts/chart-theme.ts`
 - Fechas de negocio como cadena `YYYY-MM-DD`; en Prisma son `@db.Date`
+- **"Hoy" siempre sale de `lib/dates.ts`** (`todayISO()`, `resolveDateParam()`, `businessToday()`). Nunca `new Date().toISOString().slice(0, 10)`: Vercel corre en UTC y desde las 6 de la tarde (hora de México) eso ya es mañana
 - Los `Decimal` de Prisma se convierten con `.toNumber()` antes de pasarlos a componentes cliente
 - Server Actions: `"use server"`, primera línea `await assertOwner()`, validar con zod, devolver `ActionResult` (`{ ok: true, data } | { ok: false, error }`) y llamar `revalidatePath`
 - Páginas del panel: server components que leen con funciones de `lib/queries/`; los formularios y rejillas son client components
@@ -60,7 +63,8 @@ captura diaria de 9 puestos, precios de despiece, pollo frío, pedidos, corte y 
 - En Next 16 el archivo se llama `proxy.ts`, no `middleware.ts`. No crees `middleware.ts`
 - `auth.config.ts` corre en el Edge: no importes Prisma ni bcryptjs ahí
 - `/api/cron/refresh-forecasts` no tiene sesión; se protege con `Authorization: Bearer $CRON_SECRET`
-- Nunca leas, imprimas ni subas `.env`, `.env.local` ni `_to_delete/.env.bak`. Variables nuevas se documentan en `.env.example`
+- Nunca leas, imprimas ni subas `.env`, `.env.local` ni `_to_delete/.env.bak`. Variables nuevas se documentan en `.env.example` (plantilla versionada, sin claves reales)
+- El repositorio es **público**: ninguna contraseña, token ni URL de base de datos en el código. `prisma/seed.ts` exige `OWNER_PASSWORD` (no hay clave por defecto)
 - `DATABASE_URL` es la conexión con pooler (runtime); `DIRECT_URL` es la directa (migraciones). `.env.local` apunta a la base real: no corras `migrate reset` ni el seed sin confirmación
 
 ## Diseño
@@ -83,9 +87,17 @@ Este sitio se pule conservando la identidad: no cambies marca, textos, etiquetas
 
 ### Panel
 
-- Todo va dentro de `.admin` (tema oscuro, acento naranja). Superficies con `.material`, botones con `.press`, tarjetas con `<Panel>`
+- Todo va dentro de `.admin` (tema oscuro, acento naranja). Superficies con `.material` (tarjetas `rounded-3xl`); `<Panel>` es la misma tarjeta con entrada animada
+- Piezas compartidas, definidas una sola vez en `app/globals.css` (`@layer components`): campos `.field` (+ `.field-num` para números, `.field-label` para la etiqueta), botones `.btn` + `.btn-primary | .btn-secondary | .btn-ghost | .btn-danger` (+ `.btn-sm`, `.btn-icon`) y tablas `.table` (+ `.num`, `.sticky-col`). No repitas cadenas largas de utilidades para estas piezas
+- Componentes en `components/admin/ui/`: `PageHeader` (un solo `<h1>` por pantalla) y `SectionTitle`, `DateNav` (pantallas por día), `TierBadge` (semáforo), `Notice` (resultado de una acción), `ConfirmDelete` (borrar en dos pasos), `SubmitButton`
+- Pantallas por día (`captura`, `corte`, `frio`): la fecha llega por `?date=` y se resuelve con `resolveDateParam()`. Los componentes cliente que guardan estado editable se montan con `key={date}` para que nunca se mezclen los datos de dos días
+- Estado editable + `router.refresh()`: deriva las filas de las props y guarda aparte solo los cambios sin guardar (ver `ColdManager`); un `useState(() => props…)` no se entera de los datos nuevos
+- Formularios: `onSubmit` + `preventDefault` (no `action={fn}`), para que un error del servidor no borre lo escrito. Los campos opcionales vacíos se omiten antes de enviar (vacío no es 0)
+- Todo campo lleva `<label htmlFor>` o `aria-label`; los botones de solo icono llevan `aria-label` y el icono `aria-hidden`
 - Colores de gráficas solo desde `CHART` en `components/admin/charts/chart-theme.ts`
 - El estado nunca se comunica solo con color: icono o etiqueta además del tono
+- Texto secundario en `text-neutral-400` como mínimo (`neutral-500` no alcanza contraste sobre el fondo oscuro)
+- Verifica en 390 y 1440 px: en el teléfono la captura se muestra como tarjetas y ninguna pantalla debe desplazarse hacia los lados
 
 ### Skills de diseño (`.claude/skills/`)
 
@@ -96,8 +108,11 @@ Este sitio se pule conservando la identidad: no cambies marca, textos, etiquetas
 
 ## Trampas conocidas
 
-- `_to_delete/` y los archivos `.fuse_hidden*` son basura de sesiones anteriores: no los importes, edites ni tomes como referencia
-- `npx tsc --noEmit` ya reporta 6 errores previos en código real: el `formatter` del `Tooltip` de recharts (4 gráficas), `auth.config.ts` y un `Buffer` en `lib/import/parseSalesXlsx.ts`. Un cambio no debe sumar errores nuevos
+- `_to_delete/` y los archivos `.fuse_hidden*` son basura de sesiones anteriores (están en `.gitignore`): no los importes, edites ni tomes como referencia
+- `npx tsc --noEmit`, `npm run lint` y `npm test` pasan limpios (0 errores, 22 pruebas). Un cambio no debe romper ninguno de los tres
+- Recharts 3: el valor del `formatter` del `Tooltip` no viene tipado como número; conviértelo con `Number(v)`
+- Un texto `sr-only` dentro de una tabla con desplazamiento horizontal ensancha la página si la tabla no es `position: relative` (`.table` ya lo es)
 - `prisma.config.ts` carga `.env` a mano; Prisma ya no lo hace solo
-- El número de puestos (9) está escrito a mano en `CaptureGrid.tsx` (`/9`) y en el seed
+- El número de puestos sale de la base (puestos activos); solo el seed lista los 9 iniciales
+- `components/admin/ExcelUpload.tsx`, `StatTiles.tsx` y `charts/SalesTrendChart.tsx` no se usan en ninguna pantalla; `/admin/sobrantes` existe pero no está en el menú
 - `next/font/google` (Geist) necesita red en build y en dev

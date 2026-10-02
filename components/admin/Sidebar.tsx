@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, Table2, Tag, ShoppingBag, Snowflake, ClipboardList, Wallet, Sparkles, Menu, X, Drumstick,
+  LayoutDashboard, Table2, Tag, ShoppingBag, Snowflake, ClipboardList, Wallet, Sparkles, Menu, X, Drumstick, ExternalLink,
 } from "lucide-react";
 
 const NAV = [
@@ -18,33 +18,103 @@ const NAV = [
   { href: "/admin/analitica", label: "Analítica", icon: Sparkles },
 ] as const;
 
+/**
+ * Menú del panel. En escritorio es una columna fija a la izquierda; en móvil
+ * es un cajón que se abre con el botón de menú y se cierra con Escape, al
+ * tocar fuera o al elegir una sección.
+ */
 export function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const openButton = useRef<HTMLButtonElement | null>(null);
+  const closeButton = useRef<HTMLButtonElement | null>(null);
+
+  const close = () => {
+    setOpen(false);
+    openButton.current?.focus();
+  };
+
+  // Con el cajón abierto: Escape lo cierra y el foco entra al cajón.
+  useEffect(() => {
+    if (!open) return;
+    closeButton.current?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      openButton.current?.focus();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="fixed left-4 top-4 z-40 rounded-lg border border-white/10 bg-white/5 p-2 text-neutral-200 backdrop-blur-md md:hidden" aria-label="Abrir menú"><Menu size={18} /></button>
-      {open ? <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={() => setOpen(false)} aria-hidden /> : null}
-      <aside className={["fixed z-50 flex h-full w-64 flex-col border-r border-white/10 bg-neutral-900/70 backdrop-blur-xl transition-transform md:static md:translate-x-0", open ? "translate-x-0" : "-translate-x-full"].join(" ")}>
+      <button
+        ref={openButton}
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Abrir menú"
+        aria-expanded={open}
+        aria-controls="menu-panel"
+        className="btn btn-icon btn-secondary fixed left-3 top-2.5 z-40 backdrop-blur-md md:hidden"
+      >
+        <Menu aria-hidden size={18} />
+      </button>
+
+      {open ? <div className="fixed inset-0 z-40 bg-black/60 md:hidden" onClick={close} aria-hidden /> : null}
+
+      {/* En móvil, cerrado = fuera de pantalla e invisible (así tampoco recibe foco). */}
+      <aside
+        id="menu-panel"
+        className={[
+          "fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col border-r border-white/10 bg-neutral-900/80 backdrop-blur-xl",
+          "duration-200 ease-out md:visible md:sticky md:top-0 md:h-dvh md:translate-x-0",
+          // Al abrir se vuelve visible de inmediato (para poder recibir el foco);
+          // al cerrar, la visibilidad espera a que termine el deslizamiento.
+          open ? "visible translate-x-0 transition-transform" : "invisible -translate-x-full transition-[translate,visibility]",
+        ].join(" ")}
+      >
         <div className="flex items-center justify-between px-5 py-5">
           <div className="flex items-center gap-2">
-            <span className="rounded-lg bg-orange-500/20 p-1.5 text-orange-400"><Drumstick size={18} /></span>
+            <span className="rounded-lg bg-orange-500/20 p-1.5 text-orange-400">
+              <Drumstick aria-hidden size={18} />
+            </span>
             <span className="font-semibold text-white">Pollos Juacost</span>
           </div>
-          <button type="button" onClick={() => setOpen(false)} className="text-neutral-400 md:hidden" aria-label="Cerrar menú"><X size={18} /></button>
+          <button ref={closeButton} type="button" onClick={close} aria-label="Cerrar menú" className="btn btn-sm btn-icon btn-ghost md:hidden">
+            <X aria-hidden size={18} />
+          </button>
         </div>
-        <nav className="flex-1 space-y-1 px-3">
+
+        <nav aria-label="Secciones del panel" className="flex-1 space-y-1 overflow-y-auto px-3">
           {NAV.map(({ href, label, icon: Icon }) => {
             const active = href === "/admin" ? pathname === href : pathname.startsWith(href);
             return (
-              <Link key={href} href={href} onClick={() => setOpen(false)}
-                className={["flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition", active ? "bg-orange-500/15 text-orange-300" : "text-neutral-300 hover:bg-white/5 hover:text-white"].join(" ")}>
-                <Icon size={18} /> {label}
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setOpen(false)}
+                aria-current={active ? "page" : undefined}
+                className={[
+                  "flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                  active ? "bg-orange-500/15 font-medium text-orange-300" : "text-neutral-300 hover:bg-white/5 hover:text-white",
+                ].join(" ")}
+              >
+                <Icon aria-hidden size={18} className="shrink-0" /> {label}
               </Link>
             );
           })}
         </nav>
-        <p className="px-5 py-4 text-[11px] text-neutral-500">Panel privado · solo dueño</p>
+
+        <div className="space-y-2 border-t border-white/10 px-3 py-3">
+          <Link
+            href="/"
+            className="flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm text-neutral-300 transition-colors hover:bg-white/5 hover:text-white"
+          >
+            <ExternalLink aria-hidden size={18} className="shrink-0" /> Ver sitio público
+          </Link>
+          <p className="px-3 text-xs text-neutral-400">Panel privado · solo dueño</p>
+        </div>
       </aside>
     </>
   );

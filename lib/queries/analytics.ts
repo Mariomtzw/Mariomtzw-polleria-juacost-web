@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { businessToday } from "@/lib/dates";
 import {
   diferenciaPollos,
   equivalentesVendidos,
@@ -39,8 +40,7 @@ export interface DashboardTotals {
 }
 
 function daysAgo(n: number): Date {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
+  const d = businessToday(); // "hoy" es el día del negocio, no el del servidor (UTC)
   d.setDate(d.getDate() - n);
   return d;
 }

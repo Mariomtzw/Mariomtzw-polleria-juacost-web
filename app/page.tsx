@@ -381,8 +381,12 @@ export default function Home() {
               </div>
             </motion.div>
 
-            <footer className="border-t-2 border-brand-red/20 pt-6 text-center text-xs font-bold md:pt-8 md:text-left md:text-sm">
+            <footer className="flex flex-col items-center gap-2 border-t-2 border-brand-red/20 pt-6 text-center text-xs font-bold md:flex-row md:justify-between md:pt-8 md:text-left md:text-sm">
               <p>© {new Date().getFullYear()} Pollos Juacos&apos;t. Todos los derechos reservados.</p>
+              {/* Acceso discreto al panel privado (pide correo y contraseña) */}
+              <Link href="/admin" prefetch={false} className="rounded px-1 py-1 font-semibold underline decoration-brand-red/40 underline-offset-4 hover:decoration-brand-red-dark">
+                Acceso administrador
+              </Link>
             </footer>
           </div>
         </section>

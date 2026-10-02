@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
-import { Lock } from "lucide-react";
+import { AlertCircle, ArrowLeft, Lock } from "lucide-react";
 import { auth, signIn } from "@/auth";
+import { SubmitButton } from "@/components/admin/ui/SubmitButton";
+
+export const metadata: Metadata = { title: "Entrar" };
 
 // Si ya hay sesión OWNER, no mostramos el login.
 export default async function LoginPage({
@@ -35,11 +40,11 @@ export default async function LoginPage({
   }
 
   return (
-    <main className="admin flex min-h-screen items-center justify-center bg-neutral-950 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-md">
+    <main className="admin flex min-h-dvh flex-col items-center justify-center gap-6 p-4">
+      <div className="material w-full max-w-sm rounded-3xl p-6 sm:p-8">
         <div className="mb-6 flex items-center gap-3">
           <div className="rounded-xl bg-orange-500/20 p-2 text-orange-400">
-            <Lock size={20} />
+            <Lock aria-hidden size={20} />
           </div>
           <div>
             <h1 className="text-lg font-semibold text-white">Pollos Juacost</h1>
@@ -48,8 +53,9 @@ export default async function LoginPage({
         </div>
 
         {error ? (
-          <p className="mb-4 rounded-lg bg-red-500/15 px-3 py-2 text-sm text-red-300">
-            Credenciales inválidas o sin permiso.
+          <p role="alert" className="mb-4 flex items-start gap-2 rounded-xl bg-red-500/15 px-3 py-2 text-sm text-red-200">
+            <AlertCircle aria-hidden size={16} className="mt-0.5 shrink-0" />
+            Correo o contraseña incorrectos. Revisa los datos e inténtalo de nuevo.
           </p>
         ) : null}
 
@@ -64,7 +70,8 @@ export default async function LoginPage({
               type="email"
               required
               autoComplete="email"
-              className="w-full rounded-lg border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none focus:border-orange-500"
+              aria-invalid={error ? true : undefined}
+              className="field"
             />
           </div>
           <div>
@@ -77,17 +84,19 @@ export default async function LoginPage({
               type="password"
               required
               autoComplete="current-password"
-              className="w-full rounded-lg border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none focus:border-orange-500"
+              aria-invalid={error ? true : undefined}
+              className="field"
             />
           </div>
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-orange-500 px-3 py-2 font-medium text-neutral-950 transition hover:bg-orange-400"
-          >
+          <SubmitButton pendingText="Entrando…" className="btn btn-primary w-full">
             Entrar
-          </button>
+          </SubmitButton>
         </form>
       </div>
+
+      <Link href="/" className="btn btn-ghost">
+        <ArrowLeft aria-hidden size={16} /> Volver al sitio
+      </Link>
     </main>
   );
 }

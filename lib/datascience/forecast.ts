@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { businessToday } from "@/lib/dates";
 import { loadBranchContext } from "./factors";
 import { getBranchSeries } from "./baseline";
 import { mean } from "./stats";
@@ -79,8 +80,7 @@ export async function generateForecasts(days = 14): Promise<ForecastRow[]> {
   const branches = await prisma.branch.findMany({ where: { isActive: true }, select: { id: true } });
   const results: ForecastRow[] = [];
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = businessToday(); // día del negocio (no el del servidor en UTC)
 
   for (const b of branches) {
     const [{ baseline, multipliers, branchName }, ctx] = await Promise.all([
