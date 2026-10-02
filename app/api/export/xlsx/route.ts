@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import ExcelJS from "exceljs";
-import { auth } from "@/auth";
+import { getOwnerSession } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
 import { equivalentesVendidos, diferenciaPollos, tierFor, getThresholds } from "@/lib/calculations";
 
@@ -10,8 +10,7 @@ export const dynamic = "force-dynamic";
 const TIER_LABEL: Record<string, string> = { GREEN: "Buena", YELLOW: "Regular", RED: "Baja" };
 
 export async function GET(): Promise<NextResponse> {
-  const session = await auth();
-  if (!session?.user || session.user.role !== "OWNER") {
+  if (!(await getOwnerSession())) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, Table2, Tag, ShoppingBag, Snowflake, ClipboardList, Wallet, Sparkles, Menu, X, Drumstick, ExternalLink,
+  LayoutDashboard, Table2, Tag, ShoppingBag, Snowflake, ClipboardList, Wallet, Sparkles, Menu, X, Drumstick, ExternalLink, UserCog,
 } from "lucide-react";
 
 const NAV = [
@@ -106,14 +106,27 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div className="space-y-2 border-t border-white/10 px-3 py-3">
+        <div className="space-y-1 border-t border-white/10 px-3 py-3">
+          <Link
+            href="/admin/cuenta"
+            onClick={() => setOpen(false)}
+            aria-current={pathname.startsWith("/admin/cuenta") ? "page" : undefined}
+            className={[
+              "flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+              pathname.startsWith("/admin/cuenta")
+                ? "bg-orange-500/15 font-medium text-orange-300"
+                : "text-neutral-300 hover:bg-white/5 hover:text-white",
+            ].join(" ")}
+          >
+            <UserCog aria-hidden size={18} className="shrink-0" /> Mi cuenta
+          </Link>
           <Link
             href="/"
             className="flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm text-neutral-300 transition-colors hover:bg-white/5 hover:text-white"
           >
             <ExternalLink aria-hidden size={18} className="shrink-0" /> Ver sitio público
           </Link>
-          <p className="px-3 text-xs text-neutral-400">Panel privado · solo dueño</p>
+          <p className="px-3 pt-1 text-xs text-neutral-400">Panel privado · solo dueño</p>
         </div>
       </aside>
     </>

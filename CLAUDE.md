@@ -20,12 +20,13 @@ captura diaria de 9 puestos, precios de despiece, pollo frío, pedidos, corte y 
 - Unitarias: `npm test`
 - E2E: `npm run test:e2e` (requiere `npm run dev` corriendo, o `E2E_BASE_URL`)
 - BD: `npx prisma migrate dev`, `npm run db:seed`, `npm run db:studio`
+- Emergencia: `npm run password:reset -- correo@ejemplo.com` pone una contraseña temporal al dueño (usa la base del `.env`)
 
 ## Estructura
 
 - `app/page.tsx`, `app/recetas/` — sitio público (client components)
-- `app/(admin)/admin/login/` — login del dueño
-- `app/(admin)/admin/(dashboard)/` — panel: `captura`, `precios`, `ventas`, `frio`, `pedidos`, `corte`, `analitica`, `sobrantes`
+- `app/(admin)/admin/login/`, `recuperar/`, `restablecer/` — entrar y recuperar la contraseña (públicas, sin sesión)
+- `app/(admin)/admin/(dashboard)/` — panel: `captura`, `precios`, `ventas`, `frio`, `pedidos`, `corte`, `analitica`, `sobrantes`, `cuenta`
 - `app/(admin)/admin/layout.tsx` — título y `noindex` de todo el panel. `app/robots.ts` — bloquea `/admin` y `/api`
 - `app/api/` — `auth`, `blob/upload`, `export/xlsx`, `cron/refresh-forecasts`
 - `components/ui/` — piezas del sitio público (lamp, aurora-button, scroll-expansion-hero, whatsapp-float)
@@ -33,7 +34,9 @@ captura diaria de 9 puestos, precios de despiece, pollo frío, pedidos, corte y 
 - `components/admin/` — piezas del panel (`ui/`, `dashboard/`, `charts/`, `forms/`)
 - `lib/actions/` — Server Actions (mutaciones). `lib/queries/` — lecturas para páginas
 - `lib/pricing.ts`, `lib/calculations.ts` — fórmulas de negocio. `lib/datascience/` — pronóstico y patrones
-- `lib/validation.ts` — esquemas zod. `lib/auth-guards.ts` — `requireOwner` / `assertOwner`
+- `lib/validation.ts` — esquemas zod. `lib/auth-guards.ts` — `getOwnerSession` / `requireOwner` / `assertOwner`
+- `lib/account/` — reglas de contraseña (`password-policy.ts`) y enlaces firmados de recuperación (`tokens.ts`). `lib/mail.ts` — correo por Resend. `lib/app-url.ts` — dirección pública del sitio
+- `components/admin/account/` — pantallas sin sesión (`AuthShell`) y formularios de Mi cuenta
 - `lib/dates.ts` — el "día del negocio" (hora de México): `todayISO`, `shiftISO`, `resolveDateParam`, `businessToday`, `formatDateShort`, `formatDateLong`
 - `prisma/schema.prisma`, `prisma/seed.ts` — modelo y datos iniciales (9 puestos, 8 piezas, usuario OWNER)
 - `auth.config.ts` (edge-safe), `auth.ts` (Node), `proxy.ts` (protege `/admin/*`)
@@ -60,6 +63,11 @@ captura diaria de 9 puestos, precios de despiece, pollo frío, pedidos, corte y 
 ## Seguridad
 
 - Tres capas, las tres obligatorias: `proxy.ts` (borde), `requireOwner()` en el layout del panel, `assertOwner()` en cada Server Action y route handler
+- La sesión se revalida contra la base en cada petición (`getOwnerSession`): guarda la huella `pv` de la contraseña con la que se entró, así que **cambiar la contraseña cierra todas las sesiones**. Nunca valides solo con `auth()`: usa `getOwnerSession()`
+- Únicas Server Actions sin `assertOwner()`: `requestPasswordReset`, `checkResetLink` y `resetPassword` en `lib/actions/account.ts` (el dueño no tiene sesión). Su prueba de identidad es el enlace firmado
+- Recuperación de contraseña: enlace firmado con `AUTH_SECRET` + hash vigente, sin tabla en la base; vence en 30 minutos y es de un solo uso. La respuesta es idéntica exista o no el correo. Máximo 3 correos por usuario cada 15 minutos (se cuenta en `AuditLog`)
+- Si cambia `AUTH_SECRET`, se cierran todas las sesiones y mueren los enlaces pendientes
+- Las rutas públicas de `/admin` se listan en `PUBLIC_ADMIN_PATHS` de `auth.config.ts`
 - En Next 16 el archivo se llama `proxy.ts`, no `middleware.ts`. No crees `middleware.ts`
 - `auth.config.ts` corre en el Edge: no importes Prisma ni bcryptjs ahí
 - `/api/cron/refresh-forecasts` no tiene sesión; se protege con `Authorization: Bearer $CRON_SECRET`
@@ -109,10 +117,12 @@ Este sitio se pule conservando la identidad: no cambies marca, textos, etiquetas
 ## Trampas conocidas
 
 - `_to_delete/` y los archivos `.fuse_hidden*` son basura de sesiones anteriores (están en `.gitignore`): no los importes, edites ni tomes como referencia
-- `npx tsc --noEmit`, `npm run lint` y `npm test` pasan limpios (0 errores, 22 pruebas). Un cambio no debe romper ninguno de los tres
+- `npx tsc --noEmit`, `npm run lint` y `npm test` pasan limpios (0 errores, 35 pruebas). Un cambio no debe romper ninguno de los tres
 - Recharts 3: el valor del `formatter` del `Tooltip` no viene tipado como número; conviértelo con `Number(v)`
 - Un texto `sr-only` dentro de una tabla con desplazamiento horizontal ensancha la página si la tabla no es `position: relative` (`.table` ya lo es)
 - `prisma.config.ts` carga `.env` a mano; Prisma ya no lo hace solo
 - El número de puestos sale de la base (puestos activos); solo el seed lista los 9 iniciales
 - `components/admin/ExcelUpload.tsx`, `StatTiles.tsx` y `charts/SalesTrendChart.tsx` no se usan en ninguna pantalla; `/admin/sobrantes` existe pero no está en el menú
 - `next/font/google` (Geist) necesita red en build y en dev
+- Correo: sin dominio verificado en Resend, el remitente de pruebas (`onboarding@resend.dev`) solo entrega al correo dueño de la cuenta de Resend. En desarrollo, sin `RESEND_API_KEY`, el correo se escribe en la terminal; en producción nunca se imprime
+- bcrypt ignora lo que pase de 72 bytes: por eso la contraseña tiene máximo además de mínimo
