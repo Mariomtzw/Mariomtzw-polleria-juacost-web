@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, MotionConfig, type Variants } from "framer-motion";
-import { Leaf, Truck, Star, Phone, MapPin, Clock, ArrowRight, EggFried, Mail } from "lucide-react";
+import { Leaf, Truck, Star, Phone, MapPin, Clock, ArrowRight, EggFried, Mail, Lock } from "lucide-react";
 import { LampContainer } from "@/components/ui/lamp";
 import { AuroraButton } from "@/components/ui/aurora-button";
 import { SITE, whatsappUrl } from "@/lib/site";
@@ -31,7 +31,7 @@ const NAV_LINKS = [
 ] as const;
 
 const navLinkClass =
-  "block rounded-full px-1 py-3.5 text-[0.6875rem] font-bold uppercase -outline-offset-2 tracking-wide text-white transition-colors hover:text-brand-yellow min-[400px]:px-2 min-[400px]:text-xs md:px-3 md:py-3 md:text-sm md:tracking-wider";
+  "block rounded-full px-0.5 py-3.5 text-[0.6875rem] font-bold uppercase -outline-offset-2 text-white transition-colors hover:text-brand-yellow min-[400px]:px-1 min-[400px]:text-xs min-[400px]:tracking-wide md:px-2.5 md:py-3 md:text-sm md:tracking-wider lg:px-3";
 
 const fieldClass =
   "w-full rounded-xl bg-brand-yellow/20 p-4 text-base font-semibold text-brand-red-dark placeholder:font-medium placeholder:text-brand-red-dark/80";
@@ -71,7 +71,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: EASE_OUT_EXPO }}
           className="fixed inset-x-0 top-0 z-50 border-b border-brand-yellow/30 bg-brand-red/90 backdrop-blur-md"
         >
-          <nav aria-label="Principal" className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-2 px-4 md:px-6">
+          <nav aria-label="Principal" className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-2 px-3 md:px-6">
             <a href="#inicio" className="flex shrink-0 items-center gap-2 rounded-full md:gap-3">
               <Image
                 src="/logo.svg"
@@ -87,8 +87,9 @@ export default function Home() {
               <span className="sr-only sm:hidden">Juacos&apos;t, ir al inicio</span>
             </a>
 
+            <div className="flex min-w-0 items-center gap-1 md:gap-3">
             {/* Si aun así no caben (pantallas muy angostas), la lista se desliza */}
-            <ul className="flex items-center gap-0.5 overflow-x-auto whitespace-nowrap [scrollbar-width:none] md:gap-2 [&::-webkit-scrollbar]:hidden">
+            <ul className="flex min-w-0 items-center gap-0.5 overflow-x-auto whitespace-nowrap [scrollbar-width:none] md:gap-2 [&::-webkit-scrollbar]:hidden">
               {NAV_LINKS.map((link) => (
                 <li key={link.href} className={"hideOnMobile" in link ? "hidden sm:block" : undefined}>
                   {link.href.startsWith("/") ? (
@@ -103,6 +104,20 @@ export default function Home() {
                 </li>
               ))}
             </ul>
+
+            {/* Acceso al panel privado, siempre a la vista: candado en teléfono y
+                tableta, candado + "Admin" en pantallas anchas. Pide correo y contraseña. */}
+            <Link
+              href="/admin"
+              prefetch={false}
+              aria-label="Acceso administrador"
+              title="Acceso administrador"
+              className="flex size-9 shrink-0 items-center justify-center gap-2 rounded-full border-2 border-brand-yellow text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-yellow hover:text-brand-red-dark md:size-10 lg:size-auto lg:px-4 lg:py-2"
+            >
+              <Lock aria-hidden size={16} strokeWidth={2.5} className="shrink-0" />
+              <span className="hidden lg:inline">Admin</span>
+            </Link>
+            </div>
           </nav>
         </motion.header>
 
