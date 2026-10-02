@@ -1,0 +1,346 @@
+// Pollos Juacost — Panel privado
+// schema.prisma FINAL — Fase 2
+// PostgreSQL (Supabase) + Prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // Supabase pooled (pgbouncer) — usado por la app
+  directUrl = env("DIRECT_URL")   // Supabase directo — usado por las migraciones
+}
+
+// ─────────────────────────── Auth / RBAC ───────────────────────────
+enum Role {
+  OWNER
+  STAFF // reservado para el futuro; hoy no accede al panel
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String // bcryptjs
+  role         Role     @default(OWNER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  auditLogs AuditLog[]
+  uploads   Attachment[]
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String // "LOGIN", "SALE_CREATE", ...
+  meta      Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model AppSetting {
+  key   String @id // p. ej. "tier.green.max" = "1", "tier.yellow.max" = "5"
+  value String
+}
+
+// ─────────────────────────── Negocio ───────────────────────────
+model Branch {
+  id        String   @id @default(cuid())
+  name      String // "S.M. Manuela"
+  zone      String? // prefijo/ubicación: "S.M.", "Piletas", "Central"...
+  code      String   @unique // "P01"
+  address   String?
+  town      String?
+  latitude  Float? // clima + cercanía a fiestas
+  longitude Float?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sellers      Seller[]
+  sales        DailySale[]
+  orders       Order[]
+  leftovers    Leftover[]
+  priceLists   PriceList[]
+  weather      WeatherDaily[]
+  eventImpacts EventBranchImpact[]
+  forecasts    SalesForecast[]
+  coldPrices   ColdPiecePrice[]
+  coldStock    ColdStock[]
+
+  @@index([isActive])
+}
+
+model Seller {
+  id        String   @id @default(cuid())
+  name      String // "Manuela"
+  phone     String?
+  branchId  String? // puesto habitual (informativo; puede rotar)
+  branch    Branch?  @relation(fields: [branchId], references: [id])
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sales   DailySale[]
+  payroll PayrollEntry[]
+
+  @@index([branchId, isActive])
+}
+
+model PieceType {
+  id         String  @id @default(cuid())
+  code       String  @unique // "PECHUGA", "PIERNA", "ALA", ...
+  label      String // "Pechuga"
+  perChicken Int     @default(1) // multiplicador: pierna/ala/pata = 2
+  sortOrder  Int     @default(0)
+
+  leftovers Leftover[]
+  coldPrices ColdPiecePrice[]
+  coldStock  ColdStock[]
+}
+
+// Lista de precios vigente POR PUESTO. Se cambia solo cuando cambia
+// el precio del pollo entero. La captura diaria toma la lista activa
+// como valor por defecto y guarda un snapshot en DailySale.
+model PriceList {
+  id            String   @id @default(cuid())
+  branchId      String
+  branch        Branch   @relation(fields: [branchId], references: [id])
+  effectiveFrom DateTime @db.Date
+  isActive      Boolean  @default(true)
+
+  precioPolloEntero Decimal? @db.Decimal(8, 2) // precio que gatilla el ajuste
+  precioPechuga     Decimal  @db.Decimal(8, 2)
+  precioPierna      Decimal  @db.Decimal(8, 2)
+  precioAla         Decimal  @db.Decimal(8, 2)
+  precioHuacal      Decimal  @db.Decimal(8, 2)
+  precioRabadilla   Decimal  @db.Decimal(8, 2)
+  precioHigado      Decimal  @db.Decimal(8, 2)
+  precioPata        Decimal  @db.Decimal(8, 2)
+  precioCabeza      Decimal  @db.Decimal(8, 2)
+  precioPorPieza    Decimal  @db.Decimal(10, 2) // snapshot calculado de la fórmula
+
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([branchId, effectiveFrom])
+  @@index([branchId, isActive])
+}
+
+model DailySale {
+  id       String   @id @default(cuid())
+  date     DateTime @db.Date
+  branchId String
+  branch   Branch   @relation(fields: [branchId], references: [id])
+  // La vendedora se CONFIRMA en la captura (rotan entre puestos):
+  sellerId String
+  seller   Seller   @relation(fields: [sellerId], references: [id])
+
+  pollosAsignados Decimal @db.Decimal(8, 2) // "Pollos enteros"
+  valorEstimado   Decimal @db.Decimal(12, 2) // "Valor estimado"
+  vendidoReal     Decimal @db.Decimal(12, 2) // "Vendido real"
+
+  // Snapshot de precios usados ese día (por defecto vienen de PriceList vigente)
+  precioPechuga   Decimal @db.Decimal(8, 2)
+  precioPierna    Decimal @db.Decimal(8, 2)
+  precioAla       Decimal @db.Decimal(8, 2)
+  precioHuacal    Decimal @db.Decimal(8, 2)
+  precioRabadilla Decimal @db.Decimal(8, 2)
+  precioHigado    Decimal @db.Decimal(8, 2)
+  precioPata      Decimal @db.Decimal(8, 2)
+  precioCabeza    Decimal @db.Decimal(8, 2)
+  precioPorPieza  Decimal @db.Decimal(10, 2) // snapshot calculado
+
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attachments Attachment[]
+
+  @@unique([date, branchId]) // un registro por puesto/día
+  @@index([date])
+  @@index([branchId, date])
+  @@index([sellerId, date])
+}
+
+model Order {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  branchId  String // pedidos por puesto
+  branch    Branch   @relation(fields: [branchId], references: [id])
+  amount    Decimal  @db.Decimal(12, 2)
+  quantity  Int? // n.º de pollos, si aplica
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([branchId, date])
+}
+
+model Leftover {
+  id          String    @id @default(cuid())
+  date        DateTime  @db.Date
+  branchId    String // sobrante por puesto
+  branch      Branch    @relation(fields: [branchId], references: [id])
+  pieceTypeId String
+  pieceType   PieceType @relation(fields: [pieceTypeId], references: [id])
+  quantity    Decimal   @db.Decimal(10, 2)
+  unitPrice   Decimal?  @db.Decimal(8, 2)
+  createdAt   DateTime  @default(now())
+
+  @@index([branchId, date])
+}
+
+model PayrollEntry {
+  id          String   @id @default(cuid())
+  sellerId    String
+  seller      Seller   @relation(fields: [sellerId], references: [id])
+  periodStart DateTime @db.Date
+  periodEnd   DateTime @db.Date
+  amount      Decimal  @db.Decimal(10, 2)
+  paid        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([sellerId, periodStart])
+}
+
+// ─────────────────── Variables externas (clima / eventos) ───────────────────
+enum WeatherCondition {
+  CLEAR
+  CLOUDS
+  RAIN
+  STORM
+  FOG
+  OTHER
+}
+
+model WeatherDaily {
+  id              String            @id @default(cuid())
+  branchId        String
+  branch          Branch            @relation(fields: [branchId], references: [id])
+  date            DateTime          @db.Date
+  tempMaxC        Float?
+  tempMinC        Float?
+  tempAvgC        Float?
+  precipitationMm Float?
+  humidityPct     Float?
+  condition       WeatherCondition?
+  source          String?
+  createdAt       DateTime          @default(now())
+
+  @@unique([branchId, date])
+  @@index([date])
+}
+
+enum EventType {
+  NATIONAL_HOLIDAY
+  MUNICIPAL_FIESTA
+  PATRONAL_FIESTA
+  LOCAL_EVENT
+  PAYDAY
+}
+
+model CalendarEvent {
+  id          String    @id @default(cuid())
+  name        String
+  type        EventType
+  town        String?
+  latitude    Float?
+  longitude   Float?
+  startDate   DateTime  @db.Date
+  endDate     DateTime? @db.Date
+  description String?
+  source      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  impacts EventBranchImpact[]
+
+  @@index([startDate])
+  @@index([type])
+}
+
+model EventBranchImpact {
+  id         String        @id @default(cuid())
+  eventId    String
+  event      CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  branchId   String
+  branch     Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  distanceKm Float?
+  weight     Float?
+
+  @@unique([eventId, branchId])
+  @@index([branchId])
+}
+
+// ─────────────────── Predicción / Archivos ───────────────────
+model SalesForecast {
+  id           String   @id @default(cuid())
+  branchId     String
+  branch       Branch   @relation(fields: [branchId], references: [id])
+  date         DateTime @db.Date
+  predictedRev Decimal? @db.Decimal(12, 2)
+  actualRev    Decimal? @db.Decimal(12, 2)
+  factors      Json?
+  modelVersion String?
+  createdAt    DateTime @default(now())
+
+  @@unique([branchId, date, modelVersion])
+  @@index([branchId, date])
+}
+
+model Attachment {
+  id           String     @id @default(cuid())
+  url          String
+  filename     String
+  contentType  String?
+  sizeBytes    Int?
+  uploadedById String
+  uploadedBy   User       @relation(fields: [uploadedById], references: [id])
+  saleId       String?
+  sale         DailySale? @relation(fields: [saleId], references: [id])
+  createdAt    DateTime   @default(now())
+
+  @@index([saleId])
+}
+
+// ─────────────────── Pollo Frío (sobrante fresco → frío al día siguiente) ───────────────────
+
+model ColdPiecePrice {
+  id            String    @id @default(cuid())
+  branchId      String
+  branch        Branch    @relation(fields: [branchId], references: [id])
+  pieceTypeId   String
+  pieceType     PieceType @relation(fields: [pieceTypeId], references: [id])
+  price         Decimal   @db.Decimal(8, 2)
+  effectiveFrom DateTime  @db.Date
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+
+  @@index([branchId, pieceTypeId, isActive])
+}
+
+model ColdStock {
+  id               String    @id @default(cuid())
+  date             DateTime  @db.Date
+  branchId         String
+  branch           Branch    @relation(fields: [branchId], references: [id])
+  pieceTypeId      String
+  pieceType        PieceType @relation(fields: [pieceTypeId], references: [id])
+  originBranchId   String?
+  originDate       DateTime? @db.Date
+  quantityReceived Decimal   @db.Decimal(10, 2)
+  unitPrice        Decimal   @db.Decimal(8, 2)
+  quantitySold     Decimal   @db.Decimal(10, 2) @default(0)
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([date, branchId, pieceTypeId])
+  @@index([date, branchId])
+}
