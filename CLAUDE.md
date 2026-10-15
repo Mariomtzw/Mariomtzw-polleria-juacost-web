@@ -77,16 +77,31 @@ captura diaria de 9 puestos, precios de despiece, pollo frío, pedidos, corte y 
 
 ## Diseño
 
-Este sitio se pule conservando la identidad: no cambies marca, textos, etiquetas del menú ni rutas sin que se pida.
+**Dirección vigente:** el sitio público y el panel adoptan el lenguaje de diseño de Apple (ver «Lenguaje Apple»). **Solo se conservan los colores**; todo lo demás del diseño puede cambiar: tipografía, escala, rejilla, espaciado, componentes, composición de secciones, materiales, iconografía, imágenes y movimiento.
+
+No se cambia sin que se pida: los textos (se pueden reubicar y restilizar, no reescribir), las etiquetas del menú, las rutas, los datos de contacto (`lib/site.ts`), las reglas de negocio y el logotipo de la pollería. El nombre y el logotipo siempre se ven: es el lenguaje de diseño de Apple, no sus recursos (nada de logotipos, imágenes ni textos de Apple).
+
+### Lenguaje Apple (sitio público y, adaptado, panel)
+
+- Tipografía: titulares muy grandes y en negritas, con tracking ajustado e interlineado compacto; pocos tamaños y jerarquía clara. Pila del sistema (`-apple-system`, `BlinkMacSystemFont`, `system-ui`) o Inter/Geist como respaldo
+- Espacio: mucho aire; cada sección casi a pantalla completa con un solo mensaje (titular, línea de apoyo y una acción); contenido centrado con ancho de lectura corto
+- Ritmo: secciones que alternan fondos claros y de color de marca; una idea por sección
+- Navegación: barra superior delgada y fija con material translúcido (`backdrop-blur`) y pocos elementos; el acceso al administrador se conserva
+- Botones y enlaces: botones en píldora (`rounded-full`), un solo primario por vista y enlaces secundarios con flecha (`›`)
+- Materiales y formas: esquinas grandes y continuas (`rounded-2xl` a `rounded-3xl`), separadores de 1 px, cristal esmerilado solo en barras y paneles flotantes; sin bordes gruesos
+- Imágenes: a sangre o en tarjetas de esquinas redondeadas, con mucho protagonismo
+- Movimiento: revelado al desplazarse, parallax sutil y resortes (`spring`) con framer-motion; nada decorativo sin función
+- Referencia: con las skills `apple-design` (principios de movimiento para web) y la guía HIG de dickwu, cuando estén instaladas; cada pantalla se valida con ellas antes de darla por terminada
+- Los colores nunca cambian: siguen siendo los tokens de marca del sitio y el tema oscuro con acento naranja del panel
 
 ### Sitio público (landing y recetas)
 
 - Todo va dentro de `.site` (clase en el `<main>` y en el botón de WhatsApp): ahí se definen el foco de teclado y la selección
-- Fuente: Geist, cargada en `app/layout.tsx` y conectada a `font-sans` con `@theme inline` en `globals.css`
+- Fuente: se define en `app/layout.tsx` y se conecta a `font-sans` con `@theme inline` en `globals.css`; si cambia, se cambia solo ahí. No incrustes archivos de SF Pro (licencia de Apple)
 - Colores solo con tokens: `brand-red`, `brand-red-dark`, `brand-yellow`, `brand-yellow-light`. `brand-red-deep` es solo para sombras y cantos
 - Contraste: rojo sobre amarillo da 3.6:1, así que solo se usa en títulos grandes (24 px o más, en negritas). El texto pequeño sobre amarillo va en `brand-red-dark` (4.7:1) y el texto pequeño sobre rojo va en blanco, no en amarillo
 - Foco: cada superficie define `--focus-ring` según su fondo (blanco sobre rojo, `brand-red-dark` sobre amarillo, `brand-red` sobre blanco)
-- Sombras: `shadow-brand` (teñida de rojo). No uses `shadow-2xl` ni negro puro
+- Sombras: `shadow-brand` (teñida de rojo) o variantes igual de suaves y difusas definidas como token. Nunca negro puro ni `shadow-2xl`
 - Teléfonos, WhatsApp, correo, dirección y horario viven en `lib/site.ts`; los enlaces de WhatsApp se arman con `whatsappUrl()`
 - Recetas: los datos están en `app/recetas/recetas-data.ts` (ingredientes, cocción y pasos como listas). Iconos de lucide, nunca emojis
 - Imágenes con `next/image`. Formularios con `<label>` visible, nunca solo `placeholder`
@@ -95,6 +110,7 @@ Este sitio se pule conservando la identidad: no cambies marca, textos, etiquetas
 
 ### Panel
 
+- Dirección Apple en el panel: mismas superficies tipo material, tipografía, espaciado y movimiento de «Lenguaje Apple», **conservando el tema oscuro y el acento naranja**. Las reglas funcionales de abajo (contraste, tarjetas en el teléfono, sin desplazamiento lateral, etiquetas y estado no solo por color) no se relajan
 - Todo va dentro de `.admin` (tema oscuro, acento naranja). Superficies con `.material` (tarjetas `rounded-3xl`); `<Panel>` es la misma tarjeta con entrada animada
 - Piezas compartidas, definidas una sola vez en `app/globals.css` (`@layer components`): campos `.field` (+ `.field-num` para números, `.field-label` para la etiqueta), botones `.btn` + `.btn-primary | .btn-secondary | .btn-ghost | .btn-danger` (+ `.btn-sm`, `.btn-icon`) y tablas `.table` (+ `.num`, `.sticky-col`). No repitas cadenas largas de utilidades para estas piezas
 - Componentes en `components/admin/ui/`: `PageHeader` (un solo `<h1>` por pantalla) y `SectionTitle`, `DateNav` (pantallas por día), `TierBadge` (semáforo), `Notice` (resultado de una acción), `ConfirmDelete` (borrar en dos pasos), `SubmitButton`
