@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { formatDateShort } from "@/lib/dates";
+import { getBotOrders, getBotPickupBranchId } from "@/lib/queries/bot";
 import { OrderForm } from "@/components/admin/forms/OrderForm";
+import { BotOrders } from "@/components/admin/BotOrders";
 import { DataTable, type Column } from "@/components/admin/DataTable";
 import { PageHeader, SectionTitle } from "@/components/admin/ui/PageHeader";
 import { currency } from "@/components/admin/charts/chart-theme";
@@ -18,9 +20,10 @@ interface OrderRow {
 }
 
 export default async function PedidosPage() {
-  const [branches, orders] = await Promise.all([
+  const [branches, orders, botOrders, pickupBranchId] = await Promise.all([
     prisma.branch.findMany({ where: { isActive: true }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
     prisma.order.findMany({
+      where: { source: "PANEL" },
       orderBy: [{ date: "desc" }, { createdAt: "desc" }],
       take: 60,
       select: {
@@ -32,6 +35,8 @@ export default async function PedidosPage() {
         branch: { select: { name: true } },
       },
     }),
+    getBotOrders(),
+    getBotPickupBranchId(),
   ]);
 
   const rows: OrderRow[] = orders.map((o) => ({
@@ -54,6 +59,7 @@ export default async function PedidosPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Pedidos" description="Pedidos especiales por puesto (fiestas, negocios, encargos)." />
+      <BotOrders orders={botOrders} branches={branches} pickupBranchId={pickupBranchId} />
       <OrderForm branches={branches} />
       <section aria-labelledby="pedidos-ultimos">
         <SectionTitle id="pedidos-ultimos">Últimos registros</SectionTitle>

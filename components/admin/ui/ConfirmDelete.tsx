@@ -12,11 +12,14 @@ export function ConfirmDelete({
   label,
   onConfirm,
   disabled = false,
+  confirmText = "¿Eliminar?",
 }: {
   /** Qué se borra, p. ej. "Eliminar pechuga de Local Laura". */
   label: string;
   onConfirm: () => void;
   disabled?: boolean;
+  /** Texto del segundo paso, p. ej. "¿Cancelar?". */
+  confirmText?: string;
 }) {
   const [armed, setArmed] = useState(false);
 
@@ -40,7 +43,7 @@ export function ConfirmDelete({
       className={armed ? "btn btn-sm btn-danger" : "btn btn-sm btn-icon btn-ghost"}
     >
       <Trash2 aria-hidden size={14} />
-      {armed ? "¿Eliminar?" : null}
+      {armed ? confirmText : null}
     </button>
   );
 }
