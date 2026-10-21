@@ -26,6 +26,14 @@ const EXPECTED: Record<string, string[]> = {
     "@n8n/n8n-nodes-langchain.memoryPostgresChat",
     "@n8n/n8n-nodes-langchain.toolWorkflow",
   ],
+  "web-chat.json": [
+    "n8n-nodes-base.webhook",
+    "n8n-nodes-base.set",
+    "n8n-nodes-base.crypto",
+    "n8n-nodes-base.if",
+    "n8n-nodes-base.executeWorkflow",
+    "n8n-nodes-base.respondToWebhook",
+  ],
 };
 
 const read = (...p: string[]) => fs.readFileSync(path.join(N8N, ...p), "utf8");
@@ -147,6 +155,25 @@ describe("herramientas.json", () => {
       "atencion_humana",
       "$vars.OWNER_WHATSAPP",
     ]) {
+      expect(raw).toContain(text);
+    }
+  });
+});
+
+describe("web-chat.json", () => {
+  const raw = read("workflows", "web-chat.json");
+  const nodes: FlowNode[] = JSON.parse(raw).nodes;
+
+  it("expone el webhook POST pollos-chat que responde desde un nodo", () => {
+    const webhook = nodes.find((n) => n.type === "n8n-nodes-base.webhook");
+    expect(webhook?.parameters).toMatchObject({ path: "pollos-chat", httpMethod: "POST", responseMode: "responseNode" });
+  });
+
+  it("verifica la firma y responde 401 si no coincide", () => {
+    const responders = nodes.filter((n) => n.type === "n8n-nodes-base.respondToWebhook");
+    expect(responders).toHaveLength(2);
+    expect(responders.filter((n) => JSON.stringify(n.parameters).includes("401"))).toHaveLength(1);
+    for (const text of ["$vars.BOT_WEBHOOK_SECRET", "x-hub-signature-256", "x-bot-timestamp", "JSON.stringify($json.body)", "300"]) {
       expect(raw).toContain(text);
     }
   });
