@@ -18,6 +18,10 @@ export const SITE = {
 } as const;
 
 /** Enlace de WhatsApp con el mensaje ya codificado (acentos, saltos de línea, &, #). */
-export function whatsappUrl(message: string): string {
-  return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(message)}`;
+export function whatsappUrl(message: string, to: string = SITE.whatsapp): string {
+  return `https://wa.me/${to}?text=${encodeURIComponent(message)}`;
 }
+
+/** Número de los botones de pedido: el del bot si NEXT_PUBLIC_WHATSAPP_BOT trae 52 + 10 dígitos (12 en total); si no, el de SITE. */
+const botNumber = process.env.NEXT_PUBLIC_WHATSAPP_BOT ?? "";
+export const WHATSAPP_PEDIDOS: string = /^\d{12}$/.test(botNumber) ? botNumber : SITE.whatsapp;

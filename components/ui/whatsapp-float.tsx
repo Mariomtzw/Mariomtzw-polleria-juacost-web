@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { whatsappUrl } from "@/lib/site";
+import { whatsappUrl, WHATSAPP_PEDIDOS } from "@/lib/site";
 
 export default function WhatsAppFloat() {
   const pathname = usePathname();
@@ -15,7 +15,7 @@ export default function WhatsAppFloat() {
   return (
     <div className="site fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 flex items-center justify-center md:right-6 md:bottom-6">
       <motion.a
-        href={whatsappUrl(message)}
+        href={whatsappUrl(message, WHATSAPP_PEDIDOS)}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Hacer un pedido por WhatsApp (se abre en otra pestaña)"
