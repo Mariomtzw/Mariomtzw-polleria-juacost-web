@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import WhatsAppFloat from "@/components/ui/whatsapp-float";
+import ChatWidget from "@/components/ui/chat-widget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,6 +50,7 @@ export default function RootLayout({
         {children}
         {/* Botón flotante global (se oculta solo dentro de /admin) */}
         <WhatsAppFloat />
+        {process.env.NEXT_PUBLIC_CHAT_ENABLED === "1" ? <ChatWidget /> : null}
       </body>
     </html>
   );
