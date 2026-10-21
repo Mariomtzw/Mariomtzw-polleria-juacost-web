@@ -34,6 +34,15 @@ const EXPECTED: Record<string, string[]> = {
     "n8n-nodes-base.executeWorkflow",
     "n8n-nodes-base.respondToWebhook",
   ],
+  "whatsapp.json": [
+    "n8n-nodes-base.whatsAppTrigger",
+    "n8n-nodes-base.if",
+    "n8n-nodes-base.switch",
+    "n8n-nodes-base.whatsApp",
+    "n8n-nodes-base.httpRequest",
+    "@n8n/n8n-nodes-langchain.openAi",
+    "n8n-nodes-base.executeWorkflow",
+  ],
 };
 
 const read = (...p: string[]) => fs.readFileSync(path.join(N8N, ...p), "utf8");
@@ -174,6 +183,24 @@ describe("web-chat.json", () => {
     expect(responders).toHaveLength(2);
     expect(responders.filter((n) => JSON.stringify(n.parameters).includes("401"))).toHaveLength(1);
     for (const text of ["$vars.BOT_WEBHOOK_SECRET", "x-hub-signature-256", "x-bot-timestamp", "JSON.stringify($json.body)", "300"]) {
+      expect(raw).toContain(text);
+    }
+  });
+});
+
+describe("whatsapp.json", () => {
+  const raw = read("workflows", "whatsapp.json");
+  const nodes: FlowNode[] = JSON.parse(raw).nodes;
+
+  it("tiene un solo trigger de mensajes y ningún Crypto (el trigger ya verifica a Meta)", () => {
+    const triggers = nodes.filter((n) => n.type === "n8n-nodes-base.whatsAppTrigger");
+    expect(triggers).toHaveLength(1);
+    expect(triggers[0].parameters.updates).toContain("messages");
+    expect(nodes.some((n) => n.type === "n8n-nodes-base.crypto")).toBe(false);
+  });
+
+  it("transcribe notas de voz y avisa de otros formatos", () => {
+    for (const text of ["mediaUrlGet", "transcribe", "Por ahora solo leo texto y notas de voz.", "'wa:'", "$vars.WHATSAPP_PHONE_NUMBER_ID"]) {
       expect(raw).toContain(text);
     }
   });
