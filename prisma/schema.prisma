@@ -169,6 +169,18 @@ model DailySale {
   @@index([sellerId, date])
 }
 
+enum OrderSource {
+  PANEL
+  WEB
+  WHATSAPP
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
 model Order {
   id        String   @id @default(cuid())
   date      DateTime @db.Date
@@ -179,7 +191,18 @@ model Order {
   notes     String?
   createdAt DateTime @default(now())
 
+  // Chatbot de ventas (aditivo). Los pedidos del panel siguen siendo PANEL + CONFIRMED.
+  source        OrderSource @default(PANEL)
+  status        OrderStatus @default(CONFIRMED)
+  customerName  String?
+  customerPhone String?
+  items         Json? // snapshot de las líneas cotizadas por el servidor
+  pickupAt      DateTime? // desde cuándo se puede recoger
+  externalId    String?     @unique // idempotencia: "wa:<wamid>" | "web:<uuid>"
+  updatedAt     DateTime    @default(now()) @updatedAt
+
   @@index([branchId, date])
+  @@index([status, date])
 }
 
 model Leftover {

@@ -17,6 +17,9 @@ const eslintConfig = defineConfig([
     "_to_delete/**",
     "playwright-report/**",
     "test-results/**",
+    // Blueprints (traen copias de configs bajo workspace/) y workflows JSON de n8n:
+    "blueprints/**",
+    "n8n/**",
   ]),
 ]);
 

@@ -18,7 +18,7 @@ captura diaria de 9 puestos, precios de despiece, pollo frío, pedidos, corte y 
 - Tipos: `npx tsc --noEmit` — **ejecútalo siempre a mano**: `next.config.ts` ignora errores de tipos en el build. Hoy pasa en 0 errores; mantenlo así
 - Lint: `npm run lint`
 - Unitarias: `npm test`
-- E2E: `npm run test:e2e` (requiere `npm run dev` corriendo, o `E2E_BASE_URL`)
+- E2E: `npm run test:e2e` (Playwright arranca `npm run dev` por su cuenta, o reutiliza el que ya corre en el puerto 3000, salvo que definas `E2E_BASE_URL`)
 - BD: `npx prisma migrate dev`, `npm run db:seed`, `npm run db:studio`
 - Emergencia: `npm run password:reset -- correo@ejemplo.com` pone una contraseña temporal al dueño (usa la base del `.env`)
 
@@ -70,10 +70,27 @@ captura diaria de 9 puestos, precios de despiece, pollo frío, pedidos, corte y 
 - Las rutas públicas de `/admin` se listan en `PUBLIC_ADMIN_PATHS` de `auth.config.ts`
 - En Next 16 el archivo se llama `proxy.ts`, no `middleware.ts`. No crees `middleware.ts`
 - `auth.config.ts` corre en el Edge: no importes Prisma ni bcryptjs ahí
-- `/api/cron/refresh-forecasts` no tiene sesión; se protege con `Authorization: Bearer $CRON_SECRET`
+- Rutas sin sesión (las únicas route handlers sin `assertOwner()`): `/api/cron/refresh-forecasts` (`Authorization: Bearer $CRON_SECRET`), `/api/bot/catalogo` y `/api/bot/pedidos` (las llama n8n; firma HMAC con `BOT_WEBHOOK_SECRET`, 401 si no valida) y `/api/chat` (pública, la usa el widget; valida con zod y reenvía firmado a n8n)
 - Nunca leas, imprimas ni subas `.env`, `.env.local` ni `_to_delete/.env.bak`. Variables nuevas se documentan en `.env.example` (plantilla versionada, sin claves reales)
 - El repositorio es **público**: ninguna contraseña, token ni URL de base de datos en el código. `prisma/seed.ts` exige `OWNER_PASSWORD` (no hay clave por defecto)
 - `DATABASE_URL` es la conexión con pooler (runtime); `DIRECT_URL` es la directa (migraciones). `.env.local` apunta a la base real: no corras `migrate reset` ni el seed sin confirmación
+
+## Chatbot de ventas
+
+- El cerebro del bot vive **solo en n8n Cloud** (Claude como modelo). En `app/`, `lib/` y `components/` no hay prompts, llamadas a modelos ni nombres de proveedores de LLM (el gate final lo busca con `grep`)
+- Piezas en Next.js: `lib/bot/signature.ts` (firma), `lib/bot/order.ts` (catálogo de 9 productos, cotización, recogida), `lib/queries/bot.ts`, `app/api/bot/catalogo`, `app/api/bot/pedidos`, `app/api/chat`, `components/ui/chat-widget.tsx`, `components/admin/BotOrders.tsx`
+- Firma: HMAC-SHA256 de `${timestamp}.${cuerpo}` con `BOT_WEBHOOK_SECRET`; encabezados `X-Hub-Signature-256: sha256=<hex>` y `X-Bot-Timestamp`; ventana de 300 s. Se verifica sobre `await request.text()` **antes** de parsear. Solo `lib/bot/signature.ts` firma o verifica
+- El total lo calcula **siempre el servidor** con la `PriceList` del puesto de recogida (`AppSetting` `bot.pickupBranchId`); cualquier total del payload se ignora. Los pedidos del bot nacen `PENDING`; los del panel siguen `PANEL` + `CONFIRMED`
+- Idempotencia: `Order.externalId` único (`wa:<wamid>` / `web:<uuid>`), `upsert` con `update: {}`
+- Recogida: apertura 7:00, corte 14:30 (después es para el día siguiente), con `lib/dates.ts`
+- El número personal del dueño **nunca** va en el repo: vive solo en la variable `OWNER_WHATSAPP` de n8n
+- `n8n/`: workflows JSON sin secretos; credenciales solo por nombre; el prompt de `n8n/prompts/agente-sistema.md` va idéntico en `agente.json`. `__tests__/n8n-workflows.test.ts` lo comprueba
+- Prisma en este cambio, siempre offline y con URLs ficticias: `DATABASE_URL=postgresql://u:p@localhost:5432/db DIRECT_URL=postgresql://u:p@localhost:5432/db npx prisma validate` (igual con `generate`). Nunca `migrate dev`, `migrate reset`, `migrate deploy`, `db push` ni el seed; `migrate deploy` en producción solo con confirmación del dueño
+- Interruptores: `NEXT_PUBLIC_CHAT_ENABLED="0"` (oculta el widget, `/api/chat` → 503), desactivar workflows en n8n, vaciar `NEXT_PUBLIC_WHATSAPP_BOT`, rotar `BOT_WEBHOOK_SECRET`
+- Una prueba: `npm test -- __tests__/bot-routes.test.ts`. E2E del widget: `npm run test:e2e -- chat-widget` (sin `E2E_BASE_URL`, Playwright arranca `npm run dev` con `NEXT_PUBLIC_CHAT_ENABLED=1`; detén antes cualquier `npm run dev` que corra sin esa variable)
+- El "35 pruebas" de «Trampas conocidas» es la línea base previa al chatbot; la regla vigente es 0 fallidas
+- Build del chatbot: `blueprints/chatbot-ventas/` (`tasks.json` + `epics/`). Los archivos que llegaron de `blueprints/chatbot-ventas/workspace/` no se editan en un paso
+- Reglas por área: `.claude/rules/bot-endpoints.md` y `.claude/rules/n8n-workflows.md`. Gate antes de dar algo por hecho: skill `verificar-cambio`
 
 ## Diseño
 
