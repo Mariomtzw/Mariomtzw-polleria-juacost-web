@@ -1,0 +1,607 @@
+{
+  "name": "Pollos — herramientas",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "accion"
+            },
+            {
+              "name": "channel"
+            },
+            {
+              "name": "customerName"
+            },
+            {
+              "name": "customerPhone"
+            },
+            {
+              "name": "items"
+            },
+            {
+              "name": "notes"
+            },
+            {
+              "name": "resumen"
+            },
+            {
+              "name": "externalId"
+            }
+          ]
+        }
+      },
+      "id": "a001",
+      "name": "Entrada",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a002",
+                    "leftValue": "={{ $json.accion }}",
+                    "rightValue": "catalogo",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "catalogo"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a003",
+                    "leftValue": "={{ $json.accion }}",
+                    "rightValue": "pedido",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pedido"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a004",
+                    "leftValue": "={{ $json.accion }}",
+                    "rightValue": "escalar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "escalar"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a005",
+      "name": "Acción",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a006",
+              "name": "ts",
+              "value": "={{ Math.floor(Date.now() / 1000).toString() }}",
+              "type": "string"
+            },
+            {
+              "id": "a007",
+              "name": "body",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a008",
+      "name": "Firmar catálogo",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        460,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "value": "={{ $json.ts + '.' + $json.body }}",
+        "dataPropertyName": "signature",
+        "secret": "={{ $vars.BOT_WEBHOOK_SECRET }}",
+        "encoding": "hex"
+      },
+      "id": "a009",
+      "name": "HMAC catálogo",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        680,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $vars.WEB_BASE_URL }}/api/bot/catalogo",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Hub-Signature-256",
+              "value": "={{ 'sha256=' + $json.signature }}"
+            },
+            {
+              "name": "X-Bot-Timestamp",
+              "value": "={{ $json.ts }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "a010",
+      "name": "GET catálogo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a011",
+              "name": "ts",
+              "value": "={{ Math.floor(Date.now() / 1000).toString() }}",
+              "type": "string"
+            },
+            {
+              "id": "a012",
+              "name": "body",
+              "value": "={{ JSON.stringify({ externalId: $json.externalId, source: $json.channel === 'whatsapp' ? 'WHATSAPP' : 'WEB', customerName: $json.customerName, customerPhone: $json.customerPhone, items: JSON.parse($json.items || '[]'), notes: $json.notes || undefined }) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a013",
+      "name": "Firmar pedido",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "value": "={{ $json.ts + '.' + $json.body }}",
+        "dataPropertyName": "signature",
+        "secret": "={{ $vars.BOT_WEBHOOK_SECRET }}",
+        "encoding": "hex"
+      },
+      "id": "a014",
+      "name": "HMAC pedido",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.WEB_BASE_URL }}/api/bot/pedidos",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Hub-Signature-256",
+              "value": "={{ 'sha256=' + $json.signature }}"
+            },
+            {
+              "name": "X-Bot-Timestamp",
+              "value": "={{ $json.ts }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.body }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "a015",
+      "name": "POST pedido",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a016",
+              "leftValue": "={{ $json.ok === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a017",
+      "name": "¿Pedido creado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendTemplate",
+        "phoneNumberId": "={{ $vars.WHATSAPP_PHONE_NUMBER_ID }}",
+        "recipientPhoneNumber": "={{ $vars.OWNER_WHATSAPP }}",
+        "template": "pedido_nuevo|es_MX",
+        "components": {
+          "component": [
+            {
+              "type": "body",
+              "bodyParameters": {
+                "parameter": [
+                  {
+                    "type": "text",
+                    "text": "={{ $json.data.folio }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ $('Entrada').item.json.customerName }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ $('Entrada').item.json.customerPhone }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ $json.data.total }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ $json.data.pickupDate }}"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "id": "a018",
+      "name": "Avisar pedido",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        220
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "name": "WhatsApp Pollos"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "sendTemplate",
+        "phoneNumberId": "={{ $vars.WHATSAPP_PHONE_NUMBER_ID }}",
+        "recipientPhoneNumber": "={{ $vars.OWNER_WHATSAPP }}",
+        "template": "atencion_humana|es_MX",
+        "components": {
+          "component": [
+            {
+              "type": "body",
+              "bodyParameters": {
+                "parameter": [
+                  {
+                    "type": "text",
+                    "text": "={{ $('Entrada').item.json.customerName }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ $('Entrada').item.json.customerPhone }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ $('Entrada').item.json.channel }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ $('Entrada').item.json.resumen }}"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "id": "a019",
+      "name": "Avisar persona",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        460,
+        500
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "name": "WhatsApp Pollos"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a020",
+              "name": "resultado",
+              "value": "={{ JSON.stringify($('POST pedido').isExecuted ? $('POST pedido').item.json : $('GET catálogo').isExecuted ? $('GET catálogo').item.json : { ok: true, escalado: true }) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a021",
+      "name": "Resultado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1560,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Entrada": {
+      "main": [
+        [
+          {
+            "node": "Acción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acción": {
+      "main": [
+        [
+          {
+            "node": "Firmar catálogo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Firmar pedido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Avisar persona",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firmar catálogo": {
+      "main": [
+        [
+          {
+            "node": "HMAC catálogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HMAC catálogo": {
+      "main": [
+        [
+          {
+            "node": "GET catálogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET catálogo": {
+      "main": [
+        [
+          {
+            "node": "Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firmar pedido": {
+      "main": [
+        [
+          {
+            "node": "HMAC pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HMAC pedido": {
+      "main": [
+        [
+          {
+            "node": "POST pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST pedido": {
+      "main": [
+        [
+          {
+            "node": "¿Pedido creado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Pedido creado?": {
+      "main": [
+        [
+          {
+            "node": "Avisar pedido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar pedido": {
+      "main": [
+        [
+          {
+            "node": "Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar persona": {
+      "main": [
+        [
+          {
+            "node": "Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

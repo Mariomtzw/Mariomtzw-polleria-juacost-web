@@ -1,6 +1,8 @@
 // Prueba estática de n8n/: el prompt, la guía y los workflows exportados no llevan secretos ni números.
 import fs from "node:fs";
 import path from "node:path";
+import { createHmac } from "node:crypto";
+import { signPayload, verifySignature } from "@/lib/bot/signature";
 
 const N8N = path.join(process.cwd(), "n8n");
 const WORKFLOWS = path.join(N8N, "workflows");
@@ -8,7 +10,23 @@ const DIGITS = /\d{10,}/;
 const SECRET = /sk-ant-|sk-[A-Za-z0-9]{20,}|EAA[A-Za-z0-9]{20,}|Bearer [A-Za-z0-9]/;
 
 /** Archivo de workflow → tipos de nodo obligatorios. Cada workflow nuevo se agrega aquí. */
-const EXPECTED: Record<string, string[]> = {};
+const EXPECTED: Record<string, string[]> = {
+  "herramientas.json": [
+    "n8n-nodes-base.executeWorkflowTrigger",
+    "n8n-nodes-base.switch",
+    "n8n-nodes-base.set",
+    "n8n-nodes-base.crypto",
+    "n8n-nodes-base.httpRequest",
+    "n8n-nodes-base.whatsApp",
+  ],
+  "agente.json": [
+    "n8n-nodes-base.executeWorkflowTrigger",
+    "@n8n/n8n-nodes-langchain.agent",
+    "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+    "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+    "@n8n/n8n-nodes-langchain.toolWorkflow",
+  ],
+};
 
 const read = (...p: string[]) => fs.readFileSync(path.join(N8N, ...p), "utf8");
 
@@ -94,5 +112,80 @@ describe("n8n/workflows/", () => {
     }
 
     expect(JSON.stringify(stripIds(flow))).not.toMatch(DIGITS);
+  });
+});
+
+type FlowNode = { name: string; type: string; parameters: Record<string, unknown> };
+
+describe("agente.json", () => {
+  const raw = read("workflows", "agente.json");
+  const nodes: FlowNode[] = JSON.parse(raw).nodes;
+
+  it("lleva el prompt idéntico al de n8n/prompts/agente-sistema.md", () => {
+    const agent = nodes.find((n) => n.type === "@n8n/n8n-nodes-langchain.agent");
+    const options = agent?.parameters.options as { systemMessage: string };
+    expect(options.systemMessage.trim()).toBe(read("prompts", "agente-sistema.md").trim());
+  });
+
+  it("usa claude-sonnet-5-5 y exactamente las 3 herramientas", () => {
+    expect(raw).toContain("claude-sonnet-5-5");
+    const tools = nodes.filter((n) => n.type === "@n8n/n8n-nodes-langchain.toolWorkflow").map((n) => n.name);
+    expect(tools.sort()).toEqual(["consultar_catalogo", "crear_pedido", "escalar_a_persona"]);
+  });
+});
+
+describe("herramientas.json", () => {
+  it("firma las llamadas a la web y avisa al dueño con las plantillas", () => {
+    const raw = read("workflows", "herramientas.json");
+    for (const text of [
+      "$vars.BOT_WEBHOOK_SECRET",
+      "/api/bot/catalogo",
+      "/api/bot/pedidos",
+      "X-Hub-Signature-256",
+      "X-Bot-Timestamp",
+      "pedido_nuevo",
+      "atencion_humana",
+      "$vars.OWNER_WHATSAPP",
+    ]) {
+      expect(raw).toContain(text);
+    }
+  });
+});
+
+describe("contrato de firma n8n ↔ web (calculado)", () => {
+  const secret = "secreto-de-prueba";
+  const ts = "1760990000";
+
+  it("n8n → web: el cuerpo del nodo «Firmar pedido» firmado como «HMAC pedido» pasa verifySignature", () => {
+    const input = {
+      externalId: "wa:wamid.PRUEBA",
+      channel: "whatsapp",
+      customerName: "Ana López",
+      customerPhone: "5212280000",
+      items: '[{"code":"POLLO_ENTERO","cantidad":2}]',
+      notes: "",
+    };
+    // Misma expresión que el nodo «Firmar pedido».
+    const body = JSON.stringify({
+      externalId: input.externalId,
+      source: input.channel === "whatsapp" ? "WHATSAPP" : "WEB",
+      customerName: input.customerName,
+      customerPhone: input.customerPhone,
+      items: JSON.parse(input.items || "[]"),
+      notes: input.notes || undefined,
+    });
+    const header = "sha256=" + createHmac("sha256", secret).update(ts + "." + body).digest("hex");
+    expect(verifySignature({ secret, signatureHeader: header, timestampHeader: ts, body, nowSeconds: Number(ts) })).toBe(true);
+    expect(body).not.toContain("notes");
+  });
+
+  it("web → n8n: la cadena de «Preparar firma» da la misma firma que signPayload", () => {
+    const body = JSON.stringify({
+      sessionId: "web:00000000-0000-4000-8000-000000000000",
+      messageId: "00000000-0000-4000-8000-000000000001",
+      message: '¿Tienen pollo? Dijo "sí" — gracias',
+    });
+    const n8nString = ts + "." + JSON.stringify(JSON.parse(body));
+    expect("sha256=" + createHmac("sha256", secret).update(n8nString).digest("hex")).toBe(signPayload(secret, ts, body));
   });
 });
